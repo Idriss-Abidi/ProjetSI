@@ -1,0 +1,12 @@
+[
+  {
+    "title": "Time Management Tips",
+    "description": "Learn how to manage your time effectively.",
+    "tips": ["Create a schedule", "Set priorities", "Avoid distractions"]
+  },
+  {
+    "title": "Healthy Eating",
+    "description": "Simple tips for maintaining a balanced diet.",
+    "tips": ["Eat more vegetables", "Drink plenty of water", "Limit sugar intake"]
+  }
+]

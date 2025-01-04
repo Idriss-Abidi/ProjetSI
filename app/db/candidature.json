@@ -1,0 +1,37 @@
+[
+    {
+      "id_offre": 21,
+      "id_etudiant": 1,
+      "statut": "En att"
+    },
+        {
+      "id_offre": 15,
+      "id_etudiant": 3,
+      "statut": "En att"
+    },
+        {
+      "id_offre": 19,
+      "id_etudiant": 3,
+      "statut": "En att"
+    },
+    {
+      "id_offre":17,
+      "id_etudiant": 1,
+        "statut": "En att"
+    },
+        {
+      "id_offre":17,
+      "id_etudiant": 2,
+        "statut": "En att"
+    },
+    {
+      "id_offre": 1,
+      "id_etudiant": 2,
+      "statut": "En att"
+    },
+    {
+      "id_offre": 1,
+      "id_etudiant": 2,
+      "statut": "En att"
+    }
+  ]

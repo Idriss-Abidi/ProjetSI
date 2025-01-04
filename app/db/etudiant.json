@@ -1,0 +1,16 @@
+[
+    {
+      "id_etudiant": 1,
+      "id_user":2,
+      "CNE": "J12345",
+      "promo":"2023/24",
+      "niveau":"2A"
+    },
+    {
+      "id_etudiant": 2,
+      "id_user":3,
+      "CNE": "J12355",
+      "promo":"2023/24",
+      "niveau":"2A"
+    }
+  ]

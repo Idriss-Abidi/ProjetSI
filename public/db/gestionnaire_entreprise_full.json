@@ -1,0 +1,24 @@
+[
+    {
+      "id_gest_entr" :1,
+  "id_user" : 4,
+  "nom": "GEST",
+      "prenom":"ENT1",
+      "email": "gest1@gmail.com",
+      "password": "gest1",
+      "userType":"GEST_ENTRE", 
+      "tel" : "0612345688",
+  "id_entreprise" :1
+    },
+    {
+      "id_gest_entr" :2,
+  "id_user" : 5,
+  "nom": "GEST",
+      "prenom":"ENT2",
+      "email": "gest2@gmail.com",
+      "password": "gest2",
+      "userType":"GEST_ENTRE", 
+      "tel" : "0612346688",
+  "id_entreprise" :2
+    }
+  ]
