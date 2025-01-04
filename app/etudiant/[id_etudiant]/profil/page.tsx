@@ -1,14 +1,8 @@
 "use client"; // Add this line at the top of your file
 
 import Footer from "@/components/Footer";
-import {
-  Avatar,
-  Button,
-  Dropdown,
-  Label,
-  Navbar,
-  TextInput,
-} from "flowbite-react";
+import NavbarEtudiant from "@/components/etudiant/NavbarEtudiant";
+import { Button, Label, TextInput } from "flowbite-react";
 import React, { use, useEffect, useState } from "react";
 
 const profilPage = ({
@@ -105,49 +99,7 @@ const profilPage = ({
 
   return (
     <div>
-      <Navbar fluid rounded className="m-auto w-[90%]">
-        <Navbar.Brand href="https://flowbite-react.com">
-          <span className="self-center whitespace-nowrap text-xl font-semibold dark:text-white">
-            Flowbite React
-          </span>
-        </Navbar.Brand>
-        <div className="flex md:order-2">
-          <Dropdown
-            arrowIcon={false}
-            inline
-            label={
-              <Avatar
-                alt="User settings"
-                className="mx-4"
-                img="https://flowbite.com/docs/images/people/profile-picture-5.jpg"
-                rounded
-              />
-            }
-          >
-            <Dropdown.Header>
-              <span className="block text-sm">Bonnie Green</span>
-              <span className="block truncate text-sm font-medium">
-                name@flowbite.com
-              </span>
-            </Dropdown.Header>
-            <Dropdown.Item>Dashboard</Dropdown.Item>
-            <Dropdown.Item>Settings</Dropdown.Item>
-            <Dropdown.Item>Earnings</Dropdown.Item>
-            <Dropdown.Divider />
-            <Dropdown.Item>Sign out</Dropdown.Item>
-          </Dropdown>
-          <Navbar.Toggle />
-        </div>
-        <Navbar.Collapse>
-          <Navbar.Link href="#" active>
-            Home
-          </Navbar.Link>
-          <Navbar.Link href="#">About</Navbar.Link>
-          <Navbar.Link href="#">Services</Navbar.Link>
-          <Navbar.Link href="#">Pricing</Navbar.Link>
-          <Navbar.Link href="#">Contact</Navbar.Link>
-        </Navbar.Collapse>
-      </Navbar>
+      <NavbarEtudiant id={idEtudiant} />
 
       {/* Profil */}
       <div className="container m-auto p-8">
