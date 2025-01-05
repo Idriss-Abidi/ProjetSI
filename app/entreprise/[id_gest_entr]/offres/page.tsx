@@ -1,6 +1,5 @@
 "use client"; // Add this line at the top of your file
 
-import { Avatar, Dropdown, Navbar } from "flowbite-react";
 import React, { use, useEffect, useState } from "react";
 import OffersListPage from "@/components/entreprise/offersPage";
 import Footer from "@/components/Footer";

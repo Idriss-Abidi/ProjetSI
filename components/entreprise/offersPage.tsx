@@ -28,8 +28,6 @@ interface DataList {
 }
 
 const OffersListPage: React.FC<DataList> = ({ data, dataCandidatures }) => {
-  console.log("C", data);
-  console.log("C", dataCandidatures);
   const [offers, setOffers] = useState<Offer[]>([]);
   const [editingOffer, setEditingOffer] = useState<Offer | null>(null);
   const [showCandidatures, setShowCandidatures] = useState<Offer | null>(null);

@@ -11,7 +11,8 @@
       "email": "ykonkhir@gmail.com",
       "password": "ok2",
       "userType":"ETUDIANT",
-      "tel" : "0612345678"
+      "tel" : "0612345678",
+      "statut": 0 
     },
     {
       "id_etudiant": 2,
@@ -25,6 +26,82 @@
       "email": "copilot@gmail.com",
       "password": "ok3",
       "userType":"ETUDIANT", 
-      "tel" : "0622445678"
+      "tel" : "0622445678",
+      "statut": 0 
+    },
+    {
+      "id_etudiant": 3,
+      "id_user":31,
+      "CNE": "J12655",
+      "promo":"2023/24",
+      "niveau":"3A",
+      "filiere":"GD",
+      "nom": "sat",
+      "prenom":"1",
+      "email": "sat1@gmail.com",
+      "password": "sat1",
+      "userType":"ETUDIANT", 
+      "tel" : "0622445608",
+      "statut": 0 
+    },
+    {
+      "id_etudiant": 4,
+      "id_user":32,
+      "CNE": "J12535",
+      "promo":"2023/24",
+      "niveau":"1A",
+      "filiere":"IDSIT",
+      "nom": "sat",
+      "prenom":"2",
+      "email": "sat2@gmail.com",
+      "password": "sat3",
+      "userType":"ETUDIANT", 
+      "tel" : "0622405678",
+      "statut": 0 
+    },
+    {
+      "id_etudiant": 4,
+      "id_user":32,
+      "CNE": "J12535",
+      "promo":"2023/24",
+      "niveau":"1A",
+      "filiere":"IDSIT",
+      "nom": "sat",
+      "prenom":"3",
+      "email": "sat3@gmail.com",
+      "password": "sat4",
+      "userType":"ETUDIANT", 
+      "tel" : "0622203678",
+      "statut": 1 
+    },
+    {
+      "id_etudiant": 5,
+      "id_user":35,
+      "CNE": "J12536",
+      "promo":"2023/24",
+      "niveau":"3A",
+      "filiere":"2IA",
+      "nom": "satd",
+      "prenom":"2d",
+      "email": "sat2d@gmail.com",
+      "password": "sadt3",
+      "userType":"ETUDIANT", 
+      "tel" : "0621403678",
+      "statut": 0 
+    },
+    {
+      "id_etudiant": 6,
+      "id_user":36,
+      "CNE": "J12635",
+      "promo":"2023/24",
+      "niveau":"1A",
+      "filiere":"SSE",
+      "nom": "sat6",
+      "prenom":"36",
+      "email": "sat3@gmail.com",
+      "password": "sat4",
+      "userType":"ETUDIANT", 
+      "tel" : "0622283678",
+      "statut": 1 
     }
-  ]
+]

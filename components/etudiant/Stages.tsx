@@ -154,6 +154,7 @@ const StagesList: React.FC<CardList3Props> = ({ data }) => {
     <div>
       {/* Filters Section */}
       <div className="flex items-center space-x-4 py-2 justify-center">
+        <SearchCards query={query} setQuery={setQuery} />
         <Datepicker
           // selected={dateDebut}
           onChange={(date: Date | null) => setDateDebut(date)}
@@ -244,9 +245,9 @@ const StagesList: React.FC<CardList3Props> = ({ data }) => {
       </div>
 
       {/* Search Bar */}
-      <div className="flex items-center space-x-4 py-2 mb-2 m-auto justify-center w-1/3">
+      {/* <div className="flex items-center space-x-4 py-2 mb-2 m-auto justify-center w-1/3">
         <SearchCards query={query} setQuery={setQuery} />
-      </div>
+      </div> */}
 
       {/* Card List */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
