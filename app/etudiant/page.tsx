@@ -14,12 +14,12 @@ import { BASE_URL } from "@/constants/baseUrl";
 
 const Page = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // const [dataOffres, setDataOffres] = useState([]);
+  const [dataOffres, setDataOffres] = useState([]);
   const [dataCandidatures, setDataCandidatures] = useState([]);
   const [dataEntretiens, setDataEntretiens] = useState([]);
   const [dataStages, setDataStages] = useState([]);
 
-  const { data: dataOffres = [] } = useFetch(`${BASE_URL}/stage/all`, {
+  const { data } = useFetch(`${BASE_URL}/stage/all`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -32,14 +32,14 @@ const Page = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // const offresResponse = await fetch("/db/offre_affectation.json");
-        // const offresData = await offresResponse.json();
-        // const filteredOffres = offresData.filter(
-        //   (offre: { id_etudiant: number; statut_aff: string }) =>
-        //     offre.id_etudiant === idEtudiant && offre.statut_aff === "show"
-        // );
-        // console.log(filteredOffres);
-        // setDataOffres(filteredOffres);
+        const offresResponse = await fetch("/db/offre_affectation.json");
+        const offresData = await offresResponse.json();
+        const filteredOffres = offresData.filter(
+          (offre: { id_etudiant: number; statut_aff: string }) =>
+            offre.id_etudiant === idEtudiant && offre.statut_aff === "show"
+        );
+        console.log(filteredOffres);
+        setDataOffres(filteredOffres);
 
         const candidaturesResponse = await fetch("/db/candidature_offre.json");
         const candidaturesData = await candidaturesResponse.json();
@@ -114,7 +114,7 @@ const Page = () => {
         >
           <Tabs.Item active title="Offres" icon={HiUserCircle}>
             {/* Passing the JSON data to CardList3 component for "Offres" */}
-            {dataOffres && <CardList data={dataOffres} /> }
+            <CardList data={dataOffres} />
           </Tabs.Item>
           <Tabs.Item title="Candidatures" icon={HiAdjustments}>
             {/* Passing the JSON data to CardList3 component for "Candidatures" */}

@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Button, Modal, Pagination, Dropdown, Datepicker, Label, FileInput } from "flowbite-react";
 import { Combobox } from "@headlessui/react";
 import { FaSearch } from "react-icons/fa";
-import { Stage } from "@/types";
 
 // SearchCards Component
 interface SearchCardsProps {
@@ -30,11 +29,47 @@ const SearchCards: React.FC<SearchCardsProps> = ({ query, setQuery }) => {
   );
 };
 
-interface CardListProps {
+type UserType = "GEST_ENTRE" | "RESPO_STAGE" | " ADMIN_ECOLE" | " ETUDIANT" | " PROFESSEUR" | " TUTEUR"; // Add more user types as needed
+type StageStatutType = "EN_ATTENTE" | "APPROVED" | "REJECTED"; // Add more status types as needed
+
+interface User {
+  idUser: number;
+  nom: string;
+  prenom: string;
+  email: string;
+  tel: string | null;
+  userType: UserType;
+}
+
+interface Entreprise {
+  idEntreprise: number;
+  nomEntreprise: string;
+  adresse: string;
+  tel: string;
+}
+
+interface Gestionnaire {
+  idGestEntr: number;
+  user: User;
+  entreprise: Entreprise;
+}
+
+interface Stage {
+  idStage: number;
+  gestionnaire: Gestionnaire;
+  titre: string;
+  description: string;
+  dateDebut: string; // ISO 8601 format
+  dateFin: string; // ISO 8601 format
+  statut: StageStatutType;
+  abbreviation: "PFA_1A" | "PFA_2A" | "PFE";
+}
+
+interface CardList3Props {
   data: Stage[];
 }
 
-const CardList: React.FC<CardListProps> = ({ data }) => {
+const CardList: React.FC<CardList3Props> = ({ data }) => {
   const [openModalIndex, setOpenModalIndex] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [query, setQuery] = useState("");
@@ -46,16 +81,16 @@ const CardList: React.FC<CardListProps> = ({ data }) => {
   // Filter cards based on query, dates, and selected tips
   const filteredCards = data.filter((card) => {
     const matchesQuery = query
-      ? `${card.titre} ${card.description} ${card.abbreviation}`.toLowerCase().includes(query.toLowerCase())
+      ? `${card.title} ${card.description} ${card.type.join(" ")}`.toLowerCase().includes(query.toLowerCase())
       : true;
 
-    const cardStartDate = new Date(card.dateDebut);
-    const cardEndDate = new Date(card.dateFin);
+    const cardStartDate = new Date(card.date_debut);
+    const cardEndDate = new Date(card.date_fin);
     const matchesDates =
       (!dateDebut || cardStartDate >= dateDebut) &&
       (!dateFin || cardEndDate <= new Date(dateFin.getTime() + 86400000 - 1));
 
-    const matchesTips = selectedTips.length === 0 || selectedTips.includes(card.abbreviation);
+    const matchesTips = selectedTips.length === 0 || selectedTips.some((tip) => card.type.includes(tip));
 
     return matchesQuery && matchesDates && matchesTips;
   });
@@ -72,24 +107,50 @@ const CardList: React.FC<CardListProps> = ({ data }) => {
     <div>
       {/* Filters Section */}
       <div className="flex items-center space-x-4 py-2 justify-center">
-        <Datepicker onChange={(date: Date | null) => setDateDebut(date)} placeholder="Start Date" />
+        <Datepicker
+          // selected={dateDebut}
+          onChange={(date: Date | null) => setDateDebut(date)}
+          placeholder="Start Date"
+        />
         <p className="">to</p>
-        <Datepicker onChange={(date: Date | null) => setDateFin(date)} placeholder="End Date" />
-        <Dropdown label="Type Stage" size="sm">
-          <div className="px-4 py-2">
-            {Array.from(new Set(data.map((stage) => stage.abbreviation))).map((abbr) => (
-              <label key={abbr} className="flex items-center space-x-2">
+        <Datepicker
+          // selected={dateFin}
+          onChange={(date: Date | null) => setDateFin(date)}
+          placeholder="End Date"
+        />
+        <div className="flex items-center gap-4 px-2">
+          <Dropdown label="Type Stage" size="sm">
+            <div className="px-4 py-2">
+              <label className="flex items-center space-x-2">
                 <input
                   type="checkbox"
                   className="form-checkbox"
-                  onChange={() => handleTipChange(abbr)}
-                  checked={selectedTips.includes(abbr)}
+                  onChange={() => handleTipChange("PFA-1A")}
+                  checked={selectedTips.includes("PFA-1A")}
                 />
-                <span>{abbr}</span>
+                <span>PFA-1A</span>
               </label>
-            ))}
-          </div>
-        </Dropdown>
+              <label className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  className="form-checkbox"
+                  onChange={() => handleTipChange("PFA-2A")}
+                  checked={selectedTips.includes("PFA-2A")}
+                />
+                <span>PFA-2A</span>
+              </label>
+              <label className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  className="form-checkbox"
+                  onChange={() => handleTipChange("PFE")}
+                  checked={selectedTips.includes("PFE")}
+                />
+                <span>PFE</span>
+              </label>
+            </div>
+          </Dropdown>
+        </div>
       </div>
 
       {/* Search Bar */}
@@ -102,37 +163,45 @@ const CardList: React.FC<CardListProps> = ({ data }) => {
         {currentCards.map((card, index) => (
           <div key={index} className="border rounded-md p-4 shadow-md bg-white flex flex-col">
             <div className="mb-4">
-              <h2 className="text-2xl font-bold text-gray-900">{card.titre}</h2>
+              <h2 className="text-2xl font-bold text-gray-900">{card.title}</h2>
             </div>
             <div className="flex-grow mb-4">
               <p className="text-gray-700 mt-2">{card.description}</p>
             </div>
             <div className="mt-auto">
               <p className="text-gray-700 mt-2 font-bold">
-                {new Date(card.dateDebut).toLocaleDateString()} - {new Date(card.dateFin).toLocaleDateString()}
+                {card.date_debut} - {card.date_fin}
               </p>
+              {/* <div className="mt-2">
+                <strong>Tips:</strong> {card.tips.join(", ")}
+              </div> */}
               <Button className="mt-4 w-1/3" onClick={() => setOpenModalIndex(startIndex + index)}>
                 Read more
               </Button>
             </div>
             <Modal dismissible show={openModalIndex === startIndex + index} onClose={() => setOpenModalIndex(null)}>
-              <Modal.Header>{card.titre}</Modal.Header>
+              <Modal.Header>{card.title}</Modal.Header>
               <Modal.Body>
                 <div className="space-y-6">
-                  <p className="text-base leading-relaxed text-gray-500">{card.description}</p>
-                  <p>
-                    <strong>Gestionnaire:</strong> {card.gestionnaire.user.nom} {card.gestionnaire.user.prenom}
-                  </p>
-                  <p>
-                    <strong>Entreprise:</strong> {card.gestionnaire.entreprise.nomEntreprise}
-                  </p>
-                  <p>
-                    <strong>Abbreviation:</strong> {card.abbreviation}
-                  </p>
+                  <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">{card.description}</p>
+                  <ul className="list-disc pl-5 text-gray-500">
+                    {card.type.map((tip, tipIndex) => (
+                      <li key={tipIndex}>{tip}</li>
+                    ))}
+                  </ul>
                 </div>
               </Modal.Body>
               <Modal.Footer>
-                <Button onClick={() => setOpenModalIndex(null)}>Close</Button>
+                <div className="w-2/3 justify-self-center content-center ">
+                  <div>
+                    <Label htmlFor="cv-upload" />
+                  </div>
+                  <FileInput id="cv-upload" sizing="sm" />
+                </div>
+                <Button onClick={() => setOpenModalIndex(null)}>Postuler</Button>
+                <Button color="gray" onClick={() => setOpenModalIndex(null)}>
+                  Annuler
+                </Button>
               </Modal.Footer>
             </Modal>
           </div>
