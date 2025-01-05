@@ -2,7 +2,6 @@
   "name": "gestion_stages",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://89.168.40.93/",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
