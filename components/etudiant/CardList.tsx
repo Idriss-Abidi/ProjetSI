@@ -1,16 +1,7 @@
 import React, { useState } from "react";
-import {
-  Button,
-  Modal,
-  Pagination,
-  Dropdown,
-  Datepicker,
-  Label,
-  FileInput,
-} from "flowbite-react";
+import { Button, Modal, Pagination, Dropdown, Datepicker, Label, FileInput } from "flowbite-react";
 import { Combobox } from "@headlessui/react";
 import { FaSearch } from "react-icons/fa";
-import { NumberValue } from "d3";
 
 // SearchCards Component
 interface SearchCardsProps {
@@ -38,20 +29,44 @@ const SearchCards: React.FC<SearchCardsProps> = ({ query, setQuery }) => {
   );
 };
 
-// CardList Component
-interface CardData {
-  id_etudiant: number;
-  id_offre: number;
-  title: string;
+type UserType = "GEST_ENTRE" | "RESPO_STAGE" | " ADMIN_ECOLE" | " ETUDIANT" | " PROFESSEUR" | " TUTEUR"; // Add more user types as needed
+type StageStatutType = "EN_ATTENTE" | "APPROVED" | "REJECTED"; // Add more status types as needed
+
+interface User {
+  idUser: number;
+  nom: string;
+  prenom: string;
+  email: string;
+  tel: string | null;
+  userType: UserType;
+}
+
+interface Entreprise {
+  idEntreprise: number;
+  nomEntreprise: string;
+  adresse: string;
+  tel: string;
+}
+
+interface Gestionnaire {
+  idGestEntr: number;
+  user: User;
+  entreprise: Entreprise;
+}
+
+interface Stage {
+  idStage: number;
+  gestionnaire: Gestionnaire;
+  titre: string;
   description: string;
-  date_debut: string;
-  date_fin: string;
-  statut: string;
-  type: string[];
+  dateDebut: string; // ISO 8601 format
+  dateFin: string; // ISO 8601 format
+  statut: StageStatutType;
+  abbreviation: "PFA_1A" | "PFA_2A" | "PFE";
 }
 
 interface CardList3Props {
-  data: CardData[];
+  data: Stage[];
 }
 
 const CardList: React.FC<CardList3Props> = ({ data }) => {
@@ -66,9 +81,7 @@ const CardList: React.FC<CardList3Props> = ({ data }) => {
   // Filter cards based on query, dates, and selected tips
   const filteredCards = data.filter((card) => {
     const matchesQuery = query
-      ? `${card.title} ${card.description} ${card.type.join(" ")}`
-          .toLowerCase()
-          .includes(query.toLowerCase())
+      ? `${card.title} ${card.description} ${card.type.join(" ")}`.toLowerCase().includes(query.toLowerCase())
       : true;
 
     const cardStartDate = new Date(card.date_debut);
@@ -77,24 +90,17 @@ const CardList: React.FC<CardList3Props> = ({ data }) => {
       (!dateDebut || cardStartDate >= dateDebut) &&
       (!dateFin || cardEndDate <= new Date(dateFin.getTime() + 86400000 - 1));
 
-    const matchesTips =
-      selectedTips.length === 0 ||
-      selectedTips.some((tip) => card.type.includes(tip));
+    const matchesTips = selectedTips.length === 0 || selectedTips.some((tip) => card.type.includes(tip));
 
     return matchesQuery && matchesDates && matchesTips;
   });
 
   const totalPages = Math.ceil(filteredCards.length / CARDS_PER_PAGE);
   const startIndex = (currentPage - 1) * CARDS_PER_PAGE;
-  const currentCards = filteredCards.slice(
-    startIndex,
-    startIndex + CARDS_PER_PAGE
-  );
+  const currentCards = filteredCards.slice(startIndex, startIndex + CARDS_PER_PAGE);
 
   const handleTipChange = (tip: string) => {
-    setSelectedTips((prev) =>
-      prev.includes(tip) ? prev.filter((item) => item !== tip) : [...prev, tip]
-    );
+    setSelectedTips((prev) => (prev.includes(tip) ? prev.filter((item) => item !== tip) : [...prev, tip]));
   };
 
   return (
@@ -155,10 +161,7 @@ const CardList: React.FC<CardList3Props> = ({ data }) => {
       {/* Card List */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {currentCards.map((card, index) => (
-          <div
-            key={index}
-            className="border rounded-md p-4 shadow-md bg-white flex flex-col"
-          >
+          <div key={index} className="border rounded-md p-4 shadow-md bg-white flex flex-col">
             <div className="mb-4">
               <h2 className="text-2xl font-bold text-gray-900">{card.title}</h2>
             </div>
@@ -172,24 +175,15 @@ const CardList: React.FC<CardList3Props> = ({ data }) => {
               {/* <div className="mt-2">
                 <strong>Tips:</strong> {card.tips.join(", ")}
               </div> */}
-              <Button
-                className="mt-4 w-1/3"
-                onClick={() => setOpenModalIndex(startIndex + index)}
-              >
+              <Button className="mt-4 w-1/3" onClick={() => setOpenModalIndex(startIndex + index)}>
                 Read more
               </Button>
             </div>
-            <Modal
-              dismissible
-              show={openModalIndex === startIndex + index}
-              onClose={() => setOpenModalIndex(null)}
-            >
+            <Modal dismissible show={openModalIndex === startIndex + index} onClose={() => setOpenModalIndex(null)}>
               <Modal.Header>{card.title}</Modal.Header>
               <Modal.Body>
                 <div className="space-y-6">
-                  <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
-                    {card.description}
-                  </p>
+                  <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">{card.description}</p>
                   <ul className="list-disc pl-5 text-gray-500">
                     {card.type.map((tip, tipIndex) => (
                       <li key={tipIndex}>{tip}</li>
@@ -204,9 +198,7 @@ const CardList: React.FC<CardList3Props> = ({ data }) => {
                   </div>
                   <FileInput id="cv-upload" sizing="sm" />
                 </div>
-                <Button onClick={() => setOpenModalIndex(null)}>
-                  Postuler
-                </Button>
+                <Button onClick={() => setOpenModalIndex(null)}>Postuler</Button>
                 <Button color="gray" onClick={() => setOpenModalIndex(null)}>
                   Annuler
                 </Button>
@@ -218,12 +210,7 @@ const CardList: React.FC<CardList3Props> = ({ data }) => {
 
       {/* Pagination */}
       <div className="flex justify-center mt-4">
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-          showIcons
-        />
+        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} showIcons />
       </div>
     </div>
   );
