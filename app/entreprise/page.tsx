@@ -18,6 +18,8 @@ import FormComponent from "@/components/Others/FormComponent";
 import OffersListPage from "@/components/entreprise/offersPage";
 import Footer from "@/components/Footer";
 import NavbarEntreprise from "@/components/entreprise/NavbarEntreprise";
+import useFetch from "@/utils/useFetch";
+import { BASE_URL } from "@/constants/baseUrl";
 // import { Pie, Line } from "react-chartjs-2";
 
 ChartJS.register(
@@ -30,11 +32,15 @@ ChartJS.register(
   Legend
 );
 
-const Page = ({ params }: { params: Promise<{ id_gest_entr: string }> }) => {
-  // Convert id_gest_entr to an integer
-  const { id_gest_entr } = use(params);
-  const idGestEntr = parseInt(id_gest_entr, 10); // Convert string to integer
-
+const Page = () => {
+  // get id
+  const { data: dataOffres = [] } = useFetch(`${BASE_URL}/stage/all`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
   // Data for the charts
   const data1 = {
     labels: ["PFA-1A", "PFA-2A", "PFE"],
@@ -86,7 +92,7 @@ const Page = ({ params }: { params: Promise<{ id_gest_entr: string }> }) => {
 
   return (
     <div>
-      <NavbarEntreprise id={idGestEntr} />
+      {/* <NavbarEntreprise /> */}
 
       <div className="container m-auto p-8 ">
         <div className="hero bg-base-200 min-h-[400px]">

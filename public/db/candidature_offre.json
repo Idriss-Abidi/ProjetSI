@@ -46,7 +46,7 @@
       "tags": ["SQL", "MySQL", "PostgreSQL", "Database Security"],
       "id_etudiant": 3,
       "cv_path": "",
-      "statut": "En att",
+      "statut": "Accepted",
       "nom" : "nom",
       "prenom":"prenom"
 
@@ -95,7 +95,7 @@
       "tags": ["React", "JavaScript", "CSS", "HTML5", "PFA-1A"],
       "id_etudiant": 2,
       "cv_path": "",
-      "statut": "En att",
+      "statut": "Accepted",
       "nom" : "Mandri",
       "prenom":"Omar"
 

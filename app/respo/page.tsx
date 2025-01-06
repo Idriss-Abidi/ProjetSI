@@ -10,9 +10,10 @@ const Page = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // const offresResponse = await fetch("http://localhost:8080/stage/all");
-        const offresResponse = await fetch("/db/offre.json");
+        const offresResponse = await fetch("http://localhost:8080/stage/all");
+        // const offresResponse = await fetch("/db/offre.json");
         const offresData = await offresResponse.json();
+        // console.log(offresData);
         setDataOffres(offresData);
       } catch (error) {
         console.error("Error fetching data:", error);

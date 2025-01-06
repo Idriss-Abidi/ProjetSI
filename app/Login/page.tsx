@@ -6,7 +6,11 @@ import React, { useState } from "react";
 import { BASE_URL } from "@/constants/baseUrl";
 
 const LoginPage: React.FC = () => {
-  const { loading: isLoggingIn, error: loginError, execute: login } = useRequest<string, any>();
+  const {
+    loading: isLoggingIn,
+    error: loginError,
+    execute: login,
+  } = useRequest<string, any>();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,7 +19,10 @@ const LoginPage: React.FC = () => {
 
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent, typeLogin: "etudiant" | "entreprise") => {
+  const handleSubmit = async (
+    e: React.FormEvent,
+    typeLogin: "etudiant" | "entreprise"
+  ) => {
     e.preventDefault();
 
     if (!email || !password) {
@@ -26,7 +33,7 @@ const LoginPage: React.FC = () => {
     const body = {
       email: typeLogin === "etudiant" ? email : emailG,
       password: typeLogin === "etudiant" ? password : passwordG,
-    }
+    };
 
     await login(`${BASE_URL}/login`, {
       method: "POST",
@@ -48,6 +55,34 @@ const LoginPage: React.FC = () => {
   const [rememberMeG, setRememberMeG] = useState(false);
   const [errorG, setErrorG] = useState("");
 
+  const handleSubmitG = async (
+    e: React.FormEvent,
+    typeLogin: "etudiant" | "entreprise"
+  ) => {
+    e.preventDefault();
+
+    if (!email || !password) {
+      setError("Please fill in both email and password.");
+      return;
+    }
+
+    const body = {
+      email: typeLogin === "etudiant" ? email : emailG,
+      password: typeLogin === "etudiant" ? password : passwordG,
+    };
+
+    await login(`${BASE_URL}/login`, {
+      method: "POST",
+      data: body,
+      onSuccess: (data) => {
+        localStorage.setItem("token", data);
+        router.push(`/${typeLogin}`);
+      },
+      onError: (error) => {
+        setError(error.message || "Une erreur s'est produite.");
+      },
+    });
+  };
 
   return (
     <div className="grid grid-cols-2 ">
@@ -58,13 +93,25 @@ const LoginPage: React.FC = () => {
               {/* Left side */}
               <div className="flex flex-col justify-center p-4">
                 <h1 className="text-4xl font-bold mb-2">Welcome back</h1>
-                <p className="text-gray-400 font-light mb-4">Please enter your details to log in.</p>
+                <p className="text-gray-400 font-light mb-4">
+                  Please enter your details to log in.
+                </p>
 
-                {error && <div className="bg-red-500 text-white p-2 mb-4 rounded">{error}</div>}
+                {error && (
+                  <div className="bg-red-500 text-white p-2 mb-4 rounded">
+                    {error}
+                  </div>
+                )}
 
-                <form onSubmit={(e) => handleSubmit(e, "etudiant")} className="space-y-4">
+                <form
+                  onSubmit={(e) => handleSubmit(e, "etudiant")}
+                  className="space-y-4"
+                >
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium">
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-medium"
+                    >
                       Email
                     </label>
                     <input
@@ -78,7 +125,10 @@ const LoginPage: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label htmlFor="password" className="block text-sm font-medium">
+                    <label
+                      htmlFor="password"
+                      className="block text-sm font-medium"
+                    >
                       Password
                     </label>
                     <input
@@ -124,13 +174,25 @@ const LoginPage: React.FC = () => {
               {/* Left side */}
               <div className="flex flex-col justify-center p-4">
                 <h1 className="text-4xl font-bold mb-2">Welcome back</h1>
-                <p className="text-gray-400 font-light mb-4">Please enter your details to log in.</p>
+                <p className="text-gray-400 font-light mb-4">
+                  Please enter your details to log in.
+                </p>
 
-                {errorG && <div className="bg-red-500 text-white p-2 mb-4 rounded">{errorG}</div>}
+                {errorG && (
+                  <div className="bg-red-500 text-white p-2 mb-4 rounded">
+                    {errorG}
+                  </div>
+                )}
 
-                <form onSubmit={(e) => handleSubmit(e, "entreprise")} className="space-y-4">
+                <form
+                  onSubmit={(e) => handleSubmitG(e, "entreprise")}
+                  className="space-y-4"
+                >
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium">
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-medium"
+                    >
                       Email
                     </label>
                     <input
@@ -144,7 +206,10 @@ const LoginPage: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label htmlFor="password" className="block text-sm font-medium">
+                    <label
+                      htmlFor="password"
+                      className="block text-sm font-medium"
+                    >
                       Password
                     </label>
                     <input
@@ -184,6 +249,8 @@ const LoginPage: React.FC = () => {
         </main>
       </div>
     </div>
+
+    // respo and tuteur login
   );
 };
 

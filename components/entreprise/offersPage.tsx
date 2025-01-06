@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Modal, Button, TextInput, Label, Toast, Alert } from "flowbite-react";
-import CandidatureList from "./CandidatureList";
 import { HiCheck } from "react-icons/hi";
 
 interface Offer {
@@ -75,7 +74,7 @@ const OffersListPage: React.FC<DataList> = ({ data, dataCandidatures }) => {
     }
   };
 
-  const handleStatusChange = (etudiant: string, newStatut: string) => {
+  const handleStatusChange = (etudiant: number, newStatut: string) => {
     // Store the status temporarily for each candidature
     setTempStatut((prevState) => ({
       ...prevState,
@@ -83,11 +82,11 @@ const OffersListPage: React.FC<DataList> = ({ data, dataCandidatures }) => {
     }));
   };
 
-  const handleSaveStatus = (id_etudiant: string, offer: number) => {
+  const handleSaveStatus = (id_etudiant: number, offer: number) => {
     const newStatut = tempStatut[id_etudiant];
     const currentStatut = candidatures.find(
       (candidature) =>
-        candidature.id_etudiant.toString() === id_etudiant &&
+        candidature.id_etudiant === id_etudiant &&
         candidature.id_offre === offer
     )?.statut;
 
@@ -95,12 +94,22 @@ const OffersListPage: React.FC<DataList> = ({ data, dataCandidatures }) => {
     if (newStatut !== currentStatut) {
       setCandidatures((prevCandidatures) =>
         prevCandidatures.map((candidature) =>
-          candidature.id_etudiant.toString() === id_etudiant &&
+          candidature.id_etudiant === id_etudiant &&
           candidature.id_offre === offer
             ? { ...candidature, statut: newStatut }
             : candidature
         )
       );
+      // Create the JSON object
+      const updatedData = {
+        id_etudiant,
+        id_offer: offer,
+        new_statut: newStatut,
+      };
+
+      // Log the JSON object to the console
+      console.log("Updated data:", updatedData);
+
       // Show the success message
       setSavedMessage((prevState) => ({
         ...prevState,
@@ -113,7 +122,7 @@ const OffersListPage: React.FC<DataList> = ({ data, dataCandidatures }) => {
           ...prevState,
           [id_etudiant]: false,
         }));
-      }, 2000);
+      }, 1000);
     }
   };
 
@@ -145,36 +154,43 @@ const OffersListPage: React.FC<DataList> = ({ data, dataCandidatures }) => {
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">List of Offers</h1>
       <div className="space-y-4">
-        {offers.map((offer) => (
-          <div
-            key={offer.id}
-            className="flex justify-between items-center p-4 border rounded"
-          >
-            <div>
-              <h3 className="text-lg font-semibold">{offer.title}</h3>
-              <p>Description: {offer.description}</p>
-              <p>Types: {offer.type.join(", ")}</p>
-              <p>Tags: {offer.tags.join(", ")}</p>
-              <p>Date Debut: {offer.date_debut}</p>
-              <p>Date Fin: {offer.date_fin}</p>
+        {offers.map((offer) => {
+          // Calculate the number of candidatures for the current offer
+          const countCandidatures = candidatures.filter(
+            (c) => c.id_offre === offer.id
+          ).length;
+
+          return (
+            <div
+              key={offer.id}
+              className="flex justify-between items-center p-4 border rounded"
+            >
+              <div>
+                <h3 className="text-lg font-semibold">{offer.title}</h3>
+                <p>Description: {offer.description}</p>
+                <p>Types: {offer.type.join(", ")}</p>
+                <p>Tags: {offer.tags.join(", ")}</p>
+                <p>Date Debut: {offer.date_debut}</p>
+                <p>Date Fin: {offer.date_fin}</p>
+              </div>
+              <div className="flex space-x-2">
+                <Button onClick={() => setShowCandidatures(offer)} size="xs">
+                  Show Candidatures ( {countCandidatures} )
+                </Button>
+                <Button onClick={() => setEditingOffer(offer)} size="xs">
+                  Modify
+                </Button>
+                <Button
+                  color="failure"
+                  onClick={() => setDeletingOfferId(offer.id)}
+                  size="xs"
+                >
+                  Delete
+                </Button>
+              </div>
             </div>
-            <div className="flex space-x-2">
-              <Button onClick={() => setShowCandidatures(offer)} size="xs">
-                Show Candidatures
-              </Button>
-              <Button onClick={() => setEditingOffer(offer)} size="xs">
-                Modify
-              </Button>
-              <Button
-                color="failure"
-                onClick={() => setDeletingOfferId(offer.id)}
-                size="xs"
-              >
-                Delete
-              </Button>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Candidatures Modal */}
@@ -210,7 +226,7 @@ const OffersListPage: React.FC<DataList> = ({ data, dataCandidatures }) => {
                       }
                       onChange={(e) =>
                         handleStatusChange(
-                          candidature.id_etudiant.toString(),
+                          candidature.id_etudiant,
                           e.target.value
                         )
                       }
@@ -223,7 +239,7 @@ const OffersListPage: React.FC<DataList> = ({ data, dataCandidatures }) => {
                     <Button
                       onClick={() =>
                         handleSaveStatus(
-                          candidature.id_etudiant.toString(),
+                          candidature.id_etudiant,
                           candidature.id_offre
                         )
                       }

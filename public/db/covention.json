@@ -1,0 +1,20 @@
+[
+    {"conventionCode" : "String",
+        "id_etudiant": 1,
+    "id_offre": 1,
+    "id_tuteur":1,
+    "id_entreprise": 1,
+    "path" : "path.pdf"},
+    {"conventionCode" : "String",
+        "id_etudiant": 1,
+    "id_offre": 2,
+    "statut" : "path.pdf"},
+    {"conventionCode" : "String",
+        "id_etudiant": 1,
+    "id_offre": 3,
+    "statut" : "path.pdf"},
+    {"conventionCode" : "String",
+        "id_etudiant": 1,
+    "id_offre": 4,
+    "statut" : "path.pdf"}
+]

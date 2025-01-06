@@ -46,20 +46,37 @@
       "tel" : "0612346688"
     },
     {
-      "id": 6,
-      "nom": "prof",
-      "prenom":"prof1",
-      "email": "prof1@gmail.com",
-      "password": "prof1",
+      "id": 41,
+      "nom": "tuteur",
+      "prenom":"tuteur1",
+      "email": "tuteur1@gmail.com",
+      "password": "tuteur1",
       "userType":"TUTEUR", 
       "tel" : "0612345678"
     },
    {
-      "id": 7,
-      "nom": "prof",
-      "prenom":"prof2",
-      "email": "prof2@gmail.com",
-      "password": "prof2",
+      "id": 42,
+      "nom": "tuteur",
+      "prenom":"tuteur2",
+      "email": "tuteur2@gmail.com",
+      "password": "tuteur2",
+      "userType":"TUTEUR", 
+      "tel" : "0612345670"
+    },{
+      "id": 51,
+      "nom": "adminEcole",
+      "prenom":"adminEcole1",
+      "email": "adminEcole1@gmail.com",
+      "password": "adminEcole1",
+      "userType":"TUTEUR", 
+      "tel" : "0612345678"
+    },
+   {
+      "id": 52,
+      "nom": "adminEcole",
+      "prenom":"adminEcole2",
+      "email": "adminEcole2@gmail.com",
+      "password": "adminEcole2",
       "userType":"TUTEUR", 
       "tel" : "0612345670"
     }

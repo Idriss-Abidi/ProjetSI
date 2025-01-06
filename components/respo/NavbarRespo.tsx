@@ -12,7 +12,7 @@ const NavbarRespo = () => {
           <img
             src="/logo_app.png" // Replace with the path to your logo
             alt="Logo"
-            className="h-20 mr-2" // Adjust size and spacing
+            className="h-14 mr-2" // Adjust size and spacing
           />
           <span className="self-center whitespace-nowrap text-xl font-semibold dark:text-white">
             ENSIAS-STAGES
@@ -44,7 +44,7 @@ const NavbarRespo = () => {
           Offres
         </Navbar.Link>
         <Navbar.Link href={`/respo/affectation`}>Affectation</Navbar.Link>
-        <Navbar.Link href="#">Convention</Navbar.Link>
+        <Navbar.Link href={`/respo/stages`}>Stages</Navbar.Link>
       </Navbar.Collapse>
     </Navbar>
   );

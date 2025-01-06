@@ -60,7 +60,7 @@
       "statut": 0 
     },
     {
-      "id_etudiant": 4,
+      "id_etudiant": 5,
       "id_user":32,
       "CNE": "J12535",
       "promo":"2023/24",
@@ -75,7 +75,7 @@
       "statut": 1 
     },
     {
-      "id_etudiant": 5,
+      "id_etudiant": 6,
       "id_user":35,
       "CNE": "J12536",
       "promo":"2023/24",
@@ -90,7 +90,7 @@
       "statut": 0 
     },
     {
-      "id_etudiant": 6,
+      "id_etudiant": 7,
       "id_user":36,
       "CNE": "J12635",
       "promo":"2023/24",

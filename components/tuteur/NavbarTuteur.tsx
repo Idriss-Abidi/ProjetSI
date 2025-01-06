@@ -3,26 +3,24 @@
 import { Avatar, Dropdown, Navbar } from "flowbite-react";
 import React, { useEffect, useState } from "react";
 
-const NavbarEntreprise = ({ id }: { id: number }) => {
-  const [dataGestEnt, setDataGestEnt] = useState<any>(null); // Fixing the type
-  const [gestEnt, setGestEnt] = useState({
+const NavbarTuteur = ({ id }: { id: number }) => {
+  const [dataTuteur, setDataTuteur] = useState<any>(null); // Fixing the type
+  const [tuteur, setTuteur] = useState({
     nom: "",
     prenom: "",
     email: "",
   });
-  const { nom, prenom, email } = gestEnt;
+  const { nom, prenom, email } = tuteur;
 
   const loadGestEnt = async () => {
     try {
-      const gestEntResponse = await fetch(
-        "/db/gestionnaire_entreprise_full.json"
-      );
+      const gestEntResponse = await fetch("/db/tuteur.json");
       const gestEntData = await gestEntResponse.json();
-      const filteredGestEnt = gestEntData.filter(
-        (gestEnt: { id_gest_entr: number }) => gestEnt.id_gest_entr === id
+      const filteredTuteur = gestEntData.filter(
+        (tuteur: { id_tuteur: number }) => tuteur.id_tuteur === id
       );
-      if (filteredGestEnt.length > 0) {
-        setDataGestEnt(filteredGestEnt[0]); // Take the first match
+      if (filteredTuteur.length > 0) {
+        setDataTuteur(filteredTuteur[0]); // Take the first match
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -34,14 +32,14 @@ const NavbarEntreprise = ({ id }: { id: number }) => {
   }, [id]); // Load data when 'id' changes
 
   useEffect(() => {
-    if (dataGestEnt) {
-      setGestEnt({
-        nom: dataGestEnt.nom,
-        prenom: dataGestEnt.prenom,
-        email: dataGestEnt.email,
+    if (dataTuteur) {
+      setTuteur({
+        nom: dataTuteur.nom,
+        prenom: dataTuteur.prenom,
+        email: dataTuteur.email,
       });
     }
-  }, [dataGestEnt]); // Update gestEnt when dataGestEnt is fetched
+  }, [dataTuteur]); // Update Tuteur when dataTuteur is fetched
 
   return (
     <div>
@@ -87,12 +85,8 @@ const NavbarEntreprise = ({ id }: { id: number }) => {
           <Navbar.Toggle />
         </div>
         <Navbar.Collapse>
-          <Navbar.Link href={`/entreprise/${id}`} active>
-            Acceuil
-          </Navbar.Link>
-          <Navbar.Link href={`/entreprise/${id}/offres`}>Offres</Navbar.Link>
-          <Navbar.Link href={`/entreprise/${id}/entretien`}>
-            Entretiens
+          <Navbar.Link href={`/tuteur/${id}/evaluation`} active>
+            Evaluation Stages
           </Navbar.Link>
         </Navbar.Collapse>
       </Navbar>
@@ -100,4 +94,4 @@ const NavbarEntreprise = ({ id }: { id: number }) => {
   );
 };
 
-export default NavbarEntreprise;
+export default NavbarTuteur;

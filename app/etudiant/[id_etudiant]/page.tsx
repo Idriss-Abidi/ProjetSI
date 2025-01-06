@@ -1,4 +1,4 @@
-"use client";
+"use client"; // Add this line at the top of your file
 
 import CandidatureList from "@/components/etudiant/CandidatureList";
 import CardList from "@/components/etudiant/CardList";
@@ -13,45 +13,31 @@ import {
   HiClipboardList,
   HiUserCircle,
 } from "react-icons/hi";
+import { use } from "react";
 import NavbarEtudiant from "@/components/etudiant/NavbarEtudiant";
-import useFetch from "@/utils/useFetch";
-import { BASE_URL } from "@/constants/baseUrl";
 
-const Page = () => {
+const Page = ({ params }: { params: Promise<{ id_etudiant: string }> }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // const [dataOffres, setDataOffres] = useState([]);
+  const [dataOffres, setDataOffres] = useState([]);
   const [dataCandidatures, setDataCandidatures] = useState([]);
   const [dataEntretiens, setDataEntretiens] = useState([]);
   const [dataStages, setDataStages] = useState([]);
 
-  const { data: dataOffres = [] } = useFetch(`${BASE_URL}/affectation/offres`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-  });
-
-  // Ensure dataOffres is valid before filtering
-  const filtereddataOffres = Array.isArray(dataOffres)
-    ? dataOffres.filter(
-        (candidature: { statut: string }) => candidature.statut === "EN_ATTENTE"
-      )
-    : [];
-
-  const idEtudiant = 1; // TODO: Get the id of the logged in student
+  // Convert id_etudiant to an integer
+  const { id_etudiant } = use(params);
+  const idEtudiant = parseInt(id_etudiant, 10); // Convert string to integer
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // const offresResponse = await fetch("/db/offre_affectation.json");
-        // const offresData = await offresResponse.json();
-        // const filteredOffres = offresData.filter(
-        //   (offre: { id_etudiant: number; statut_aff: string }) =>
-        //     offre.id_etudiant === idEtudiant && offre.statut_aff === "show"
-        // );
-        // console.log(filteredOffres);
-        // setDataOffres(filteredOffres);
+        const offresResponse = await fetch("/db/offre_affectation.json");
+        const offresData = await offresResponse.json();
+        const filteredOffres = offresData.filter(
+          (offre: { id_etudiant: number; statut_aff: string }) =>
+            offre.id_etudiant === idEtudiant && offre.statut_aff === "show"
+        );
+        console.log(filteredOffres);
+        setDataOffres(filteredOffres);
 
         const candidaturesResponse = await fetch("/db/candidature_offre.json");
         const candidaturesData = await candidaturesResponse.json();
@@ -124,6 +110,14 @@ const Page = () => {
                   </li>
                 </ul>
               </div>
+
+              <a
+                href="#exploreOffers"
+                className="inline-flex items-center rounded-lg border-1 border-black px-2.5 py-1.5 text-center text-3xl font-Large text-dark hover:bg-gray-200/50 hover:text-dark-900"
+              >
+                Commencez dès maintenant !
+                <HiArrowRight className="ml-2" />
+              </a>
             </div>
           </div>
         </div>
@@ -136,7 +130,7 @@ const Page = () => {
         >
           <Tabs.Item active title="Offres" icon={HiUserCircle}>
             {/* Passing the JSON data to CardList3 component for "Offres" */}
-            {dataOffres && <CardList data={filtereddataOffres} />}
+            <CardList data={dataOffres} />
           </Tabs.Item>
           <Tabs.Item title="Candidatures" icon={HiAdjustments}>
             {/* Passing the JSON data to CardList3 component for "Candidatures" */}
