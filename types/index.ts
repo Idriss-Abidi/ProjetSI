@@ -39,3 +39,35 @@ export interface Affectation{
   stage : Stage;
   statutAffectation:string;
 }
+
+export interface Filiere {
+  idFiliere: number;
+  nomFiliere: string;
+  abbreviation: string;
+}
+
+export interface Etudiant {
+  idEtudiant: number;
+  user: User;
+  promo: string;
+  niveau: string;
+  filiere: Filiere;
+  chercheStage: boolean | null;
+  cne: string;
+}
+
+export interface Tuteur {
+  idTuteur: number;
+  user: User;
+  entreprise: Entreprise;
+}
+
+export interface RemarquesStage {
+  idRemarque: number;
+  stage: Stage;
+  etudiant: Etudiant;
+  tuteur: Tuteur;
+  noteFinale: string | null;
+  remarques: string | null;
+  statutRemarqueStage: "EN_ATTENTE" | "EN_COURS" | "TERMINE";
+}

@@ -8,12 +8,10 @@ import EtudiantsList from "@/components/ecole/EtudiantsList";
 import NavbarEcole from "@/components/ecole/NavbarEcole";
 import AddEtudiantForm from "@/components/ecole/addEtudiant";
 
-const Page = ({ params }: { params: Promise<{ id_admin: string }> }) => {
+const Page = () => {
   const [etudiantsData, setDataEtudiants] = useState([]);
   const [dataStages, setDataStages] = useState([]);
   // Convert id_gest_entr to an integer
-  const { id_admin } = use(params);
-  const idGestEntr = parseInt(id_admin, 10); // Convert string to integer
 
   useEffect(() => {
     const fetchData = async () => {

@@ -1,70 +1,64 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Modal, Button, TextInput, Toast } from "flowbite-react";
+import { RemarquesStage } from "@/types";
+import { formatDate } from "../../utils/formatDate";
+import { useRequest } from "../../utils/useRequest";
+import { BASE_URL } from "@/constants/baseUrl";
+import { cleanObject } from "@/utils/cleanObject";
 
-interface Offer {
-  id_stage: number;
-  title: string;
-  description: string;
-  date_debut: string;
-  date_fin: string;
-  type: string[];
-  tags: string[];
-  id_etudiant: number;
-  nom: string;
-  prenom: string;
-  statut: string;
-  cv_path: string;
-  note?: string;
-  remarques?: string;
+interface RemarquesStagesPageProps {
+  data: RemarquesStage[];
 }
 
-interface OffersListPageProps {
-  data: Offer[];
-}
+const statusOptions = [
+  { value: "EN_ATTENTE", label: "En Attente" },
+  { value: "EN_COURS", label: "En Cours" },
+  { value: "TERMINE", label: "Terminé" },
+];
 
-const OffersListPage: React.FC<OffersListPageProps> = ({ data }) => {
-  const [offers, setOffers] = useState<Offer[]>([]);
-  const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
-  const [editingStagiaire, setEditingStagiaire] = useState<Offer | null>(null);
+const OffersListPage: React.FC<RemarquesStagesPageProps> = ({ data }) => {
+  const [selectedRemarquesStage, setSelectedOffer] = useState<RemarquesStage | null>(null);
+  const [editingRemarquesStage, setEditingStagiaire] = useState<RemarquesStage | null>(null);
   const [note, setNote] = useState<string>("");
   const [remarques, setRemark] = useState<string>("");
-  const [statut, setStatut] = useState<string>("");
+  const [statutRemarquesStage, setStatutRemarquesStage] = useState<string>("");
   const [savedMessage, setSavedMessage] = useState(false);
 
-  useEffect(() => {
-    const uniqueOffers = Array.from(
-      new Map(data.map((offer) => [offer.id_stage, offer])).values()
-    );
-    setOffers(uniqueOffers);
-  }, [data]);
+  const { loading: updatingRemarquesStage, execute: updateRemarquesStage } = useRequest();
 
-  const handleShowStagiaires = (offer: Offer) => {
+  const handleShowStagiaires = (offer: RemarquesStage) => {
     setSelectedOffer(offer);
   };
 
-  const handleEditStagiaire = (stagiaire: Offer) => {
+  const handleEditStagiaire = (stagiaire: RemarquesStage) => {
     setEditingStagiaire(stagiaire);
-    setNote(stagiaire.note || ""); // Initialize with existing note
-    setRemark(stagiaire.remarques || ""); // Initialize with existing remark
-    setStatut(stagiaire.statut || ""); // Initialize with existing statut
+    setNote(stagiaire.noteFinale || "");
+    setRemark(stagiaire.remarques || "");
+    setStatutRemarquesStage(stagiaire.statutRemarqueStage || "");
   };
 
   const handleSaveStagiaire = () => {
-    if (editingStagiaire) {
+    if (editingRemarquesStage) {
       const updatedData = {
-        id_stage: editingStagiaire.id_stage,
-        id_etudiant: editingStagiaire.id_etudiant,
-        note,
+        noteFinale: note,
         remarques,
-        statut,
+        statut: statutRemarquesStage,
       };
-      console.log("Saved data:", updatedData);
-      setSavedMessage(true);
-      setTimeout(() => setSavedMessage(false), 2000);
-      setEditingStagiaire(null);
-      setNote("");
-      setRemark("");
-      setStatut("");
+      console.log(updatedData)
+      // updateRemarquesStage(`${BASE_URL}/remarques-stage/${selectedRemarquesStage?.idRemarque}`, {
+      //   method: "PUT",
+      //   data: cleanObject(updatedData),
+      //   headers: {
+      //     Authorization: "Bearer " + localStorage.getItem("token")
+      //   },
+      //   onSuccess: () => {
+      //     setSavedMessage(true);
+      //     location.reload();
+      //   },
+      //   onError: () => {
+      //     alert("Une erreur s'est produite.");
+      //   },
+      // });
     }
   };
 
@@ -79,102 +73,131 @@ const OffersListPage: React.FC<OffersListPageProps> = ({ data }) => {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">List of Offers</h1>
+      <h1 className="text-2xl font-bold mb-4">Listes des stages</h1>
       <div className="space-y-4">
-        {offers.map((offer) => (
-          <div
-            key={offer.id_stage}
-            className="border rounded p-4 flex justify-between items-center"
-          >
+        {data?.map((remarquesStage) => (
+          <div key={remarquesStage.stage.idStage} className="border rounded p-4 flex justify-between items-center">
             <div>
-              <h2 className="font-semibold text-lg">{offer.title}</h2>
-              <p>{offer.description}</p>
+              <h2 className="font-semibold text-lg">{remarquesStage.stage.titre}</h2>
+              <p>{remarquesStage.stage.description}</p>
               <p>
-                From {offer.date_debut} to {offer.date_fin}
+                Du: {formatDate(remarquesStage.stage.dateDebut)} au: {formatDate(remarquesStage.stage.dateFin)}
               </p>
-              <p>Tags: {offer.tags.join(", ")}</p>
+              <p>Tags: {remarquesStage.stage.tags.split(",").join(" ,")}</p>
             </div>
-            <Button onClick={() => handleShowStagiaires(offer)} size="sm">
-              View Stagiaires
+            <Button onClick={() => handleShowStagiaires(remarquesStage)} size="sm">
+              Voir stagiaires
             </Button>
           </div>
         ))}
       </div>
 
-      {selectedOffer && (
+      {selectedRemarquesStage && (
         <Modal show={true} onClose={() => setSelectedOffer(null)}>
-          <Modal.Header>Stagiaires for {selectedOffer.title}</Modal.Header>
-          <Modal.Body>
-            {data
-              .filter((d) => d.id_stage === selectedOffer.id_stage)
-              .map((stagiaire) => (
-                <div
-                  key={stagiaire.id_etudiant}
-                  className="border rounded p-4 mb-4 flex justify-between items-center"
+          <Modal.Header className="text-lg font-semibold text-gray-800">
+            Stagiaires for {selectedRemarquesStage.stage.titre}
+          </Modal.Header>
+          <Modal.Body className="space-y-4">
+            <div
+              key={selectedRemarquesStage.etudiant.idEtudiant}
+              className="flex justify-between items-center p-6 border border-gray-300 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              <div className="flex-1 pr-6">
+                <p className="text-lg font-medium text-gray-800">
+                  <strong>
+                    Stagiaire : {selectedRemarquesStage.etudiant.user.nom} {selectedRemarquesStage.etudiant.user.prenom}
+                  </strong>
+                </p>
+                <p className="text-lg font-medium text-gray-800">
+                  <strong>Note finale : {selectedRemarquesStage.noteFinale}</strong>
+                </p>
+                <p className="text-lg font-medium text-gray-800">
+                  <strong>Remarques : {selectedRemarquesStage.remarques}</strong>
+                </p>
+                <Button onClick={() => handleDownloadCV("/cv")} size="xs" color="gray" className="mt-2 text-xs">
+                  Voir CV
+                </Button>
+              </div>
+              <div className="flex-shrink-0">
+                <Button
+                  onClick={() => handleEditStagiaire(selectedRemarquesStage)}
+                  size="xs"
+                  color="success"
+                  className="text-sm"
                 >
-                  <div>
-                    <p>
-                      <strong>
-                        Stagiaire : {stagiaire.nom} {stagiaire.prenom}
-                      </strong>
-                    </p>
-                    <p>CV:</p>
-                    <Button
-                      onClick={() => handleDownloadCV(stagiaire.cv_path)}
-                      size="xs"
-                      color="gray"
-                    >
-                      Download CV
-                    </Button>
-                  </div>
-                  <Button
-                    onClick={() => handleEditStagiaire(stagiaire)}
-                    size="xs"
-                    color="success"
-                  >
-                    Edit
-                  </Button>
-                </div>
-              ))}
+                  Modifier
+                </Button>
+              </div>
+            </div>
           </Modal.Body>
         </Modal>
       )}
 
-      {editingStagiaire && (
+      {editingRemarquesStage && (
         <Modal show={true} onClose={() => setEditingStagiaire(null)}>
-          <Modal.Header>Edit Stagiaire</Modal.Header>
-          <Modal.Body>
+          <Modal.Header className="text-lg font-semibold text-gray-800">Edit Stagiaire</Modal.Header>
+          <Modal.Body className="space-y-6">
+            <p className="text-gray-700">
+              Panel de modification{" "}
+              <strong>
+                {editingRemarquesStage.etudiant.user.nom} {editingRemarquesStage.etudiant.user.prenom}
+              </strong>
+            </p>
+
             <div className="space-y-4">
-              <p>
-                Editing{" "}
-                <strong>
-                  {editingStagiaire.nom} {editingStagiaire.prenom}
-                </strong>
-              </p>
+              {/* Note Input */}
+              <label htmlFor="note" className="text-sm font-medium text-gray-700">
+                Note
+              </label>
               <TextInput
+                id="note"
                 type="number"
-                placeholder="Enter note"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
+                className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
+
+              {/* Remark Input */}
+              <label htmlFor="remark" className="text-sm font-medium text-gray-700">
+                Remarques
+              </label>
               <TextInput
+                id="remark"
                 type="text"
-                placeholder="Enter remark"
                 value={remarques}
                 onChange={(e) => setRemark(e.target.value)}
+                className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
-              <select
-                value={statut}
-                onChange={(e) => setStatut(e.target.value)}
-                className="border p-2 rounded"
-              >
-                {/* <option value="">-- Select Status --</option> */}
-                <option value="en cours">En cours</option>
-                <option value="termine">Terminé</option>
-              </select>
-              <Button onClick={handleSaveStagiaire} color="success">
-                Save
-              </Button>
+
+              {/* Status Dropdown */}
+              <div className="flex flex-col space-y-1">
+                <label htmlFor="status" className="text-sm font-medium text-gray-700">
+                  Etat du stage
+                </label>
+                <select
+                  id="status"
+                  value={statutRemarquesStage}
+                  onChange={(e) => setStatutRemarquesStage(e.target.value)}
+                  className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  {statusOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Save Button */}
+              <div className="flex justify-end">
+                <Button
+                  onClick={handleSaveStagiaire}
+                  color="success"
+                  className="px-6 py-2 text-white rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+                >
+                  Save
+                </Button>
+              </div>
             </div>
           </Modal.Body>
         </Modal>
