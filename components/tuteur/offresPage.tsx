@@ -79,7 +79,7 @@ const OffersListPage: React.FC<RemarquesStagesPageProps> = ({ data }) => {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Listes des stages - Etudiants</h1>
+      <h1 className="text-2xl font-bold mb-4">Liste des stages - étudiants</h1>
       <div className="space-y-4">
         {data?.map((remarquesStage) => (
           <div
@@ -88,8 +88,7 @@ const OffersListPage: React.FC<RemarquesStagesPageProps> = ({ data }) => {
           >
             <div>
               <h2 className="font-semibold text-lg">
-                {remarquesStage.stage.titre} -{" "}
-                {remarquesStage.statutRemarqueStage}
+                {remarquesStage.stage.titre}
               </h2>{" "}
               <small>{remarquesStage.statutRemarqueStage}</small>
               <p>
@@ -101,7 +100,7 @@ const OffersListPage: React.FC<RemarquesStagesPageProps> = ({ data }) => {
                 Du: {formatDate(remarquesStage.stage.dateDebut)} au:{" "}
                 {formatDate(remarquesStage.stage.dateFin)}
               </p>
-              <p>Tags: {remarquesStage.stage.tags.split(",").join(" ,")}</p>
+              {/* <p>Tags: {remarquesStage.stage.tags.split(",").join(" ,")}</p> */}
             </div>
             <Button
               onClick={() => handleShowStagiaires(remarquesStage)}

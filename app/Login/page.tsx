@@ -107,9 +107,9 @@ const LoginPage: React.FC = () => {
       <div className="relative flex flex-col m-6 space-y-8 bg-white shadow-2xl rounded-2xl md:flex-row md:space-y-0">
         {/* Left side */}
         <div className="flex flex-col justify-center p-4">
-          <span className="mb-2 text-4xl font-bold">Bienvenue de retour</span>
+          <span className="mb-2 text-4xl font-bold">Bienvenue</span>
           <span className="font-light text-gray-400 mb-2">
-            Bienvenue de retour ! Veuillez entrer vos coordonnées
+            Bienvenue! Veuillez entrer vos coordonnées
           </span>
 
           {/* Form */}
@@ -146,7 +146,7 @@ const LoginPage: React.FC = () => {
 
             <button
               type="submit"
-              className="btn w-full bg-black text-white p-2 rounded-lg mb-2 hover:bg-white hover:text-black hover:border hover:border-gray-300"
+              className="btn w-full bg-[rgb(168,203,202)] text-white p-2 rounded-lg mb-2 hover:bg-white hover:text-[rgb(168,203,202)] hover:border hover:border-gray-900"
             >
               Se connecter
             </button>

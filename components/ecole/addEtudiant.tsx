@@ -119,7 +119,7 @@ const AddEtudiantForm = () => {
             id="cne"
             value={formData.cne}
             onChange={handleChange}
-            placeholder="Enter CNE"
+            placeholder="Entrer CNE"
             required
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
@@ -139,7 +139,7 @@ const AddEtudiantForm = () => {
             id="promo"
             value={formData.promo}
             onChange={handleChange}
-            placeholder="Enter Promo (e.g., 2024/25)"
+            placeholder="Entrer Promo (e.g., 2024/25)"
             required
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
@@ -161,7 +161,7 @@ const AddEtudiantForm = () => {
             required
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="">Select Niveau...</option>
+            <option value="">Sélectionner Niveau...</option>
             <option value="1A">1A</option>
             <option value="2A">2A</option>
             <option value="3A">3A</option>
@@ -185,7 +185,7 @@ const AddEtudiantForm = () => {
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             disabled={loadingFilieres}
           >
-            <option value="">Select Filière...</option>
+            <option value="">Sélectionner Filière...</option>
             {filieres.map((filiere: Filiere) => (
               <option key={filiere.idFiliere} value={filiere.idFiliere}>
                 {filiere.nomFiliere} - {filiere.abbreviation}
@@ -208,7 +208,7 @@ const AddEtudiantForm = () => {
             id="nom"
             value={formData.nom}
             onChange={handleChange}
-            placeholder="Enter Nom"
+            placeholder="Entrer Nom"
             required
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
@@ -228,7 +228,7 @@ const AddEtudiantForm = () => {
             id="prenom"
             value={formData.prenom}
             onChange={handleChange}
-            placeholder="Enter Prénom"
+            placeholder="Entrer Prénom"
             required
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
@@ -248,7 +248,7 @@ const AddEtudiantForm = () => {
             id="email"
             value={formData.email}
             onChange={handleChange}
-            placeholder="Enter Email"
+            placeholder="Entrer Email"
             required
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
@@ -268,7 +268,7 @@ const AddEtudiantForm = () => {
             id="tel"
             value={formData.tel}
             onChange={handleChange}
-            placeholder="Enter Téléphone"
+            placeholder="Entrer Téléphone"
             required
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
@@ -278,9 +278,9 @@ const AddEtudiantForm = () => {
         <div className="flex justify-end">
           <button
             type="submit"
-            className="w-full sm:w-auto mt-4 px-6 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full sm:w-auto mt-4 px-6 py-2 bg-teal-600 text-white font-medium rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            Save
+            Ajouter
           </button>
         </div>
       </form>

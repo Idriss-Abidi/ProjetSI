@@ -73,7 +73,7 @@ const OffersListPage: React.FC<DataList> = ({ data }) => {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">List of Offers</h1>
+      <h1 className="text-2xl font-bold mb-4">Liste des Offres</h1>
       {/* statut  */}
       <div className="flex items-center gap-4 px-2 my-4 ">
         <Dropdown
@@ -121,11 +121,11 @@ const OffersListPage: React.FC<DataList> = ({ data }) => {
             <div>
               <h3 className="text-lg font-semibold">{offer.titre}</h3>
               <p>Description: {offer.description}</p>
-              <p>Types: {offer.abbreviation}</p>
+              <p>Type: {offer.abbreviation}</p>
               <p>Tags: {offer.tags?.split(", ")}</p>
               <p>Date Debut: {offer.dateDebut.split("T")[0]}</p>
               <p>Date Fin: {offer.dateFin.split("T")[0]}</p>
-              <p>Status: {offer.statut}</p>
+              <p>Statut: {offer.statut}</p>
             </div>
             <div className="flex space-x-2">
               <Button
@@ -170,9 +170,9 @@ const OffersListPage: React.FC<DataList> = ({ data }) => {
           <Modal.Header>Confirmation</Modal.Header>
           <Modal.Body>
             <p>
-              Are you sure you want to{" "}
-              {confirmModal.action === "ACCEPTED" ? "accept" : "reject"} this
-              offer?
+              Êtes-vous sûr de vouloir
+              {confirmModal.action === "ACCEPTED" ? "accept" : "reject"} cette
+              offre ?
             </p>
           </Modal.Body>
           <Modal.Footer>
@@ -182,7 +182,7 @@ const OffersListPage: React.FC<DataList> = ({ data }) => {
               }
               color={confirmModal.action === "ACCEPTED" ? "success" : "failure"}
             >
-              Confirm
+              Confirmer
             </Button>
             <Button
               color="gray"
@@ -190,7 +190,7 @@ const OffersListPage: React.FC<DataList> = ({ data }) => {
                 setConfirmModal({ isOpen: false, idStage: null, action: null })
               }
             >
-              Cancel
+              Annuler
             </Button>
           </Modal.Footer>
         </Modal>

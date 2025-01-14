@@ -56,9 +56,7 @@ const NavbarEntreprise = ({ entreprise }: NavbarEtudiantProps) => {
           <Navbar.Toggle />
         </div>
         <Navbar.Collapse>
-          <Navbar.Link href={`/entreprise`} active>
-            Acceuil
-          </Navbar.Link>
+          <Navbar.Link href={`/entreprise`}>Acceuil</Navbar.Link>
           <Navbar.Link href={`/entreprise/offres`}>Offres</Navbar.Link>
           <Navbar.Link href={`/entreprise/entretien`}>Entretiens</Navbar.Link>
         </Navbar.Collapse>

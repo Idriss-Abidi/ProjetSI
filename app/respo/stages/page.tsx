@@ -3,7 +3,7 @@
 import Footer from "@/components/Footer";
 import { Tabs } from "flowbite-react";
 import React, { useEffect, useState } from "react";
-import { HiAdjustments, HiUserCircle } from "react-icons/hi";
+import { HiOutlineFolderOpen, HiUserCircle } from "react-icons/hi";
 import NavbarRespo from "@/components/respo/NavbarRespo";
 import EtudiantsList from "@/components/respo/EtudiantsList";
 import { Etudiant, RemarqueStage } from "@/types";
@@ -84,10 +84,10 @@ const Page: React.FC = () => {
             variant="default"
             className="m-auto my-4 space-x-4 justify-self-center"
           >
-            <Tabs.Item active title="Offres" icon={HiUserCircle}>
+            <Tabs.Item active title="Etudiants" icon={HiUserCircle}>
               <EtudiantsList data={etudiantsData} />
             </Tabs.Item>
-            <Tabs.Item title="Candidatures" icon={HiAdjustments}>
+            <Tabs.Item title="Stages" icon={HiOutlineFolderOpen}>
               <StagesList data={dataStages} />
             </Tabs.Item>
           </Tabs>

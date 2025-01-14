@@ -73,7 +73,7 @@ const AddEntrepriseForm = () => {
             id="nomEntreprise"
             value={formData.nomEntreprise}
             onChange={handleChange}
-            placeholder="Enter Nom Entreprise"
+            placeholder="Entrer Nom Entreprise"
             required
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
@@ -93,7 +93,7 @@ const AddEntrepriseForm = () => {
             id="adresse"
             value={formData.adresse}
             onChange={handleChange}
-            placeholder="Enter Adresse"
+            placeholder="Entrer Adresse"
             required
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
@@ -113,7 +113,7 @@ const AddEntrepriseForm = () => {
             id="tel"
             value={formData.tel}
             onChange={handleChange}
-            placeholder="Enter Téléphone"
+            placeholder="Entrer Téléphone"
             required
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
@@ -123,9 +123,9 @@ const AddEntrepriseForm = () => {
         <div className="flex justify-end">
           <button
             type="submit"
-            className="w-full sm:w-auto mt-4 px-6 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full sm:w-auto mt-4 px-6 py-2 bg-teal-600 text-white font-medium rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            Save
+            Ajouter
           </button>
         </div>
       </form>

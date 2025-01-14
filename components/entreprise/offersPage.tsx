@@ -196,7 +196,7 @@ const OffersListPage: React.FC<DataList> = ({ data, dataCandidatures }) => {
                         onClick={() => handleExportCV(candidature.idCand)}
                         className="text-blue-500 underline"
                       >
-                        Download
+                        Télécharger
                       </button>
                     </p>
                   </div>
@@ -212,8 +212,8 @@ const OffersListPage: React.FC<DataList> = ({ data, dataCandidatures }) => {
                       className="border rounded px-2 py-1"
                     >
                       <option value="EN_ATTENTE">En attente</option>
-                      <option value="ACCEPTEE">Accepted</option>
-                      <option value="REFUSEE">Rejected</option>
+                      <option value="ACCEPTEE">Accepter</option>
+                      <option value="REFUSEE">Rejecter</option>
                     </select>
                     <Button
                       onClick={() =>

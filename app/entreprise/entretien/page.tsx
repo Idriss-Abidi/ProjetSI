@@ -204,8 +204,6 @@ const Page = () => {
       <div className="container m-auto p-8 ">
         {/* offres List  */}
         <EntretiensListPage data={dataEntretiens} />
-        {/* footer */}
-        <Footer />
       </div>
     </div>
   );

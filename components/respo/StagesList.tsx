@@ -33,7 +33,7 @@ const SearchCards: React.FC<SearchCardsProps> = ({ query, setQuery }) => {
             className="w-full h-[48px] pl-16 p-4 rounded-l-full max-sm:rounded-full bg-light-white outline-none cursor-pointer text-sm"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search by title or description..."
+            placeholder="Rechercher par..."
           />
         </div>
       </Combobox>
@@ -60,7 +60,7 @@ const StagesList: React.FC<CardListProps> = ({ data }) => {
   // Filter cards based on query, dates, and selected tips
   const filteredCards = data.filter((card) => {
     const matchesQuery = query
-      ? `${card.stage.titre} ${card.etudiant.user.nom} ${card.etudiant.user.prenom} ${card.stage.gestionnaire.entreprise.nomEntreprise} ${card.stage.tuteur.user.nom} ${card.stage.tuteur.user.prenom} ${card.etudiant.niveau}`
+      ? `${card.statutRemarqueStage} ${card.stage.titre} ${card.etudiant.user.nom} ${card.etudiant.user.prenom} ${card.stage.gestionnaire.entreprise.nomEntreprise} ${card.stage.tuteur.user.nom} ${card.stage.tuteur.user.prenom} ${card.etudiant.niveau}`
           .toLowerCase()
           .includes(query.toLowerCase())
       : true;
@@ -184,8 +184,8 @@ const StagesList: React.FC<CardListProps> = ({ data }) => {
                 <input
                   type="checkbox"
                   className="form-checkbox"
-                  onChange={() => handleTipChange("PFA-1A")}
-                  checked={selectedTips.includes("PFA-1A")}
+                  onChange={() => handleTipChange("PFA_1A")}
+                  checked={selectedTips.includes("PFA_1A")}
                 />
                 <span>PFA-1A</span>
               </label>
@@ -193,8 +193,8 @@ const StagesList: React.FC<CardListProps> = ({ data }) => {
                 <input
                   type="checkbox"
                   className="form-checkbox"
-                  onChange={() => handleTipChange("PFA-2A")}
-                  checked={selectedTips.includes("PFA-2A")}
+                  onChange={() => handleTipChange("PFA_2A")}
+                  checked={selectedTips.includes("PFA_2A")}
                 />
                 <span>PFA-2A</span>
               </label>

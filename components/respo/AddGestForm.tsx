@@ -3,6 +3,7 @@ import { Entreprise } from "@/types";
 import useFetch from "@/utils/useFetch";
 import { Select } from "flowbite-react";
 import { useState } from "react";
+import Loading from "../Loading";
 
 const AddGestForm = () => {
   // Fetch the user data
@@ -73,7 +74,7 @@ const AddGestForm = () => {
   };
 
   if (isLoading) {
-    return <p className="text-blue-500">Loading entreprises...</p>;
+    return <Loading />;
   }
 
   if (error) {
@@ -100,7 +101,7 @@ const AddGestForm = () => {
             id="nom"
             value={formData.nom}
             onChange={handleChange}
-            placeholder="Enter Nom"
+            placeholder="Entrer Nom"
             required
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
@@ -120,7 +121,7 @@ const AddGestForm = () => {
             id="prenom"
             value={formData.prenom}
             onChange={handleChange}
-            placeholder="Enter Prénom"
+            placeholder="Entrer Prénom"
             required
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
@@ -140,7 +141,7 @@ const AddGestForm = () => {
             id="email"
             value={formData.email}
             onChange={handleChange}
-            placeholder="Enter Email"
+            placeholder="Entrer Email"
             required
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
@@ -160,7 +161,7 @@ const AddGestForm = () => {
             id="tel"
             value={formData.tel}
             onChange={handleChange}
-            placeholder="Enter Téléphone"
+            placeholder="Entrer Téléphone"
             required
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
@@ -182,7 +183,7 @@ const AddGestForm = () => {
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
             required
           >
-            <option value="">Select an Entreprise</option>
+            <option value="">Sélectionner une entreprise</option>
             {entreprises?.map((entreprise: Entreprise) => (
               <option
                 key={entreprise.idEntreprise}
@@ -198,9 +199,9 @@ const AddGestForm = () => {
         <div className="flex justify-end">
           <button
             type="submit"
-            className="w-full sm:w-auto mt-4 px-6 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full sm:w-auto mt-4 px-6 py-2 bg-teal-600 text-white font-medium rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            Save
+            Ajouter
           </button>
         </div>
       </form>

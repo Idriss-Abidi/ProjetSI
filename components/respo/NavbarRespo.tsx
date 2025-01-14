@@ -40,9 +40,7 @@ const NavbarRespo = () => {
         <Navbar.Toggle />
       </div>
       <Navbar.Collapse>
-        <Navbar.Link href={`/respo`} active>
-          Offres
-        </Navbar.Link>
+        <Navbar.Link href={`/respo`}>Offres</Navbar.Link>
         <Navbar.Link href={`/respo/affectation`}>Affectation</Navbar.Link>
         <Navbar.Link href={`/respo/stages`}>Stages</Navbar.Link>
         <Navbar.Link href={`/respo/entreprises`}>Entreprises</Navbar.Link>

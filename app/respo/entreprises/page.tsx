@@ -3,7 +3,7 @@
 import Footer from "@/components/Footer";
 import { Tabs } from "flowbite-react";
 import React from "react";
-import { HiAdjustments, HiUserCircle } from "react-icons/hi";
+import { HiOfficeBuilding, HiUserCircle } from "react-icons/hi";
 import AddGestForm from "@/components/respo/AddGestForm";
 import AddEntrepriseForm from "@/components/respo/AddEntreprise";
 import NavbarRespo from "@/components/respo/NavbarRespo";
@@ -27,7 +27,7 @@ const Page = () => {
             {/* Passing the JSON data to CardList3 component for "Offres" */}
             <AddGestForm />
           </Tabs.Item>
-          <Tabs.Item title="Ajouter Entreprise" icon={HiAdjustments}>
+          <Tabs.Item title="Ajouter Entreprise" icon={HiOfficeBuilding}>
             {/* Passing the JSON data to CardList3 component for "Candidatures" */}
             <AddEntrepriseForm />
           </Tabs.Item>

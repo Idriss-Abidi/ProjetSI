@@ -3,7 +3,7 @@
 import Footer from "@/components/Footer";
 import { Tabs } from "flowbite-react";
 import React, { use, useEffect, useState } from "react";
-import { HiAdjustments, HiUserCircle } from "react-icons/hi";
+import { HiOutlinePlusCircle, HiUserCircle } from "react-icons/hi";
 import EtudiantsList from "@/components/ecole/EtudiantsList";
 import NavbarEcole from "@/components/ecole/NavbarEcole";
 import AddEtudiantForm from "@/components/ecole/addEtudiant";
@@ -55,7 +55,7 @@ const Page = () => {
             {/* Passing the JSON data to CardList3 component for "Offres" */}
             <EtudiantsList data={etudiantsData} />
           </Tabs.Item>
-          <Tabs.Item title="Ajouter Etudiant" icon={HiAdjustments}>
+          <Tabs.Item title="Ajouter Etudiant" icon={HiOutlinePlusCircle}>
             {/* Passing the JSON data to CardList3 component for "Candidatures" */}
             <AddEtudiantForm />
           </Tabs.Item>

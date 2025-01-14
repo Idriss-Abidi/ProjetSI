@@ -215,7 +215,7 @@ const FormComponent = () => {
         </div>
         {/* Buttons */}
         <div className="flex justify-end space-x-4">
-          <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+          <Button type="submit" className="hover:bg-blue-600">
             Soumettre
           </Button>
           <Button
