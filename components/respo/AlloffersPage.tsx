@@ -1,57 +1,54 @@
 import { useState, useEffect } from "react";
-import { Modal, Button, TextInput, Label, Toast, Alert } from "flowbite-react";
-import { HiCheck } from "react-icons/hi";
-
-interface Offer {
-  id: number;
-  title: string;
-  description: string;
-  type: string[];
-  tags: string[];
-  date_debut: string;
-  date_fin: string;
-  statut: string;
-}
+import { Modal, Button, Label } from "flowbite-react";
+import { Stage } from "@/types";
+import { BASE_URL } from "@/constants/baseUrl";
 
 interface DataList {
-  data: Offer[];
+  data: Stage[];
 }
 
 const OffersListPage: React.FC<DataList> = ({ data }) => {
-  const [offers, setOffers] = useState<Offer[]>([]);
-  const [editingOffer, setEditingOffer] = useState<Offer | null>(null);
-  const [showCandidatures, setShowCandidatures] = useState<Offer | null>(null);
-  const [tempStatut, setTempStatut] = useState<{ [key: string]: string }>({});
+  const [offers, setOffers] = useState<Stage[]>([]);
+  const [editingOffer, setEditingOffer] = useState<Stage | null>(null);
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    idStage: number | null;
+    action: "ACCEPTED" | "REFUSED" | null;
+  }>({ isOpen: false, idStage: null, action: null });
 
   useEffect(() => {
     setOffers(data);
   }, [data]);
 
-  const handleSave = () => {
-    if (editingOffer) {
-      console.log("Saving offer data:", editingOffer);
+  const handleActionConfirm = async (
+    idStage: number,
+    action: "ACCEPTED" | "REFUSED"
+  ) => {
+    try {
+      let url = "";
+      if (action === "ACCEPTED") {
+        url = `${BASE_URL}/stage/accept/${idStage}`;
+      } else if (action === "REFUSED") {
+        url = `${BASE_URL}/stage/refuse/${idStage}`;
+      }
 
-      setOffers((prevOffers) =>
-        prevOffers.map((offer) =>
-          offer.id === editingOffer.id ? editingOffer : offer
-        )
-      );
-      setEditingOffer(null);
-    }
-  };
+      const response = await fetch(url, {
+        method: "PUT", // Use PUT instead of POST
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
 
-  const handleTypeChange = (type: string) => {
-    if (editingOffer) {
-      const newTypes = editingOffer.type.includes(type)
-        ? editingOffer.type.filter((t) => t !== type)
-        : [...editingOffer.type, type];
-      setEditingOffer({ ...editingOffer, type: newTypes });
-    }
-  };
-
-  const handleStatusChange = (status: "active" | "inactive") => {
-    if (editingOffer) {
-      setEditingOffer({ ...editingOffer, statut: status });
+      if (response.ok) {
+        // Update local state if the action is successful
+        window.location.reload();
+        setConfirmModal({ isOpen: false, idStage: null, action: null });
+      } else {
+        console.error("Failed to update status");
+      }
+    } catch (error) {
+      console.error("Error during API call:", error);
     }
   };
 
@@ -61,158 +58,84 @@ const OffersListPage: React.FC<DataList> = ({ data }) => {
       <div className="space-y-4">
         {offers.map((offer) => (
           <div
-            key={offer.id}
+            key={offer.idStage}
             className="flex justify-between items-center p-4 border rounded"
           >
             <div>
-              <h3 className="text-lg font-semibold">{offer.title}</h3>
+              <h3 className="text-lg font-semibold">{offer.titre}</h3>
               <p>Description: {offer.description}</p>
-              <p>Types: {offer.type.join(", ")}</p>
-              <p>Tags: {offer.tags.join(", ")}</p>
-              <p>Date Debut: {offer.date_debut}</p>
-              <p>Date Fin: {offer.date_fin}</p>
+              <p>Types: {offer.abbreviation}</p>
+              <p>Tags: {offer.tags?.split(", ")}</p>
+              <p>Date Debut: {offer.dateDebut}</p>
+              <p>Date Fin: {offer.dateFin}</p>
               <p>Status: {offer.statut}</p>
             </div>
             <div className="flex space-x-2">
               <Button
-                value="active"
-                onClick={() => {
-                  handleStatusChange("active");
-                  setEditingOffer({ ...offer, statut: "active" });
-                }}
+                value="ACCEPTE"
+                onClick={() =>
+                  setConfirmModal({
+                    isOpen: true,
+                    idStage: offer.idStage,
+                    action: "ACCEPTED",
+                  })
+                }
                 size="xs"
               >
                 Accepter
               </Button>
               <Button
                 color="failure"
-                onClick={() => {
-                  handleStatusChange("inactive");
-                  setEditingOffer({ ...offer, statut: "inactive" });
-                }}
+                onClick={() =>
+                  setConfirmModal({
+                    isOpen: true,
+                    idStage: offer.idStage,
+                    action: "REFUSED",
+                  })
+                }
                 size="xs"
               >
                 Rejeter
-              </Button>
-              <Button onClick={() => setEditingOffer(offer)} size="xs">
-                Modifier
               </Button>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Modify Modal */}
-      {editingOffer && (
-        <Modal show={true} onClose={() => setEditingOffer(null)}>
-          <Modal.Header>Modify Offer</Modal.Header>
+      {/* Confirmation Modal */}
+      {confirmModal.isOpen && (
+        <Modal
+          show={confirmModal.isOpen}
+          onClose={() =>
+            setConfirmModal({ isOpen: false, idStage: null, action: null })
+          }
+        >
+          <Modal.Header>Confirmation</Modal.Header>
           <Modal.Body>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSave();
-              }}
-            >
-              <div className="space-y-4">
-                {/* Title */}
-                <div>
-                  <Label htmlFor="edit-title" value="Titre" />
-                  <TextInput
-                    id="edit-title"
-                    value={editingOffer.title}
-                    onChange={(e) =>
-                      setEditingOffer({
-                        ...editingOffer,
-                        title: e.target.value,
-                      })
-                    }
-                    required
-                  />
-                </div>
-
-                {/* Description */}
-                <div>
-                  <Label htmlFor="edit-description" value="Description" />
-                  <textarea
-                    id="edit-description"
-                    value={editingOffer.description}
-                    onChange={(e) =>
-                      setEditingOffer({
-                        ...editingOffer,
-                        description: e.target.value,
-                      })
-                    }
-                    className="w-full border rounded p-2"
-                    rows={4}
-                    required
-                  />
-                </div>
-
-                {/* Types */}
-                <div>
-                  <Label value="Types" />
-                  <div className="flex space-x-4">
-                    {["PFA-1A", "PFA-2A", "PFE"].map((type) => (
-                      <div key={type} className="flex items-center">
-                        <input
-                          type="checkbox"
-                          id={`edit-type-${type}`}
-                          checked={editingOffer.type.includes(type)}
-                          onChange={() => handleTypeChange(type)}
-                        />
-                        <label
-                          htmlFor={`edit-type-${type}`}
-                          className="ml-2 font-medium"
-                        >
-                          {type}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Date Debut */}
-                <div>
-                  <Label htmlFor="edit-date-debut" value="Date Début" />
-                  <TextInput
-                    id="edit-date-debut"
-                    type="date"
-                    value={editingOffer.date_debut}
-                    onChange={(e) =>
-                      setEditingOffer({
-                        ...editingOffer,
-                        date_debut: e.target.value,
-                      })
-                    }
-                    required
-                  />
-                </div>
-
-                {/* Date Fin */}
-                <div>
-                  <Label htmlFor="edit-date-fin" value="Date Fin" />
-                  <TextInput
-                    id="edit-date-fin"
-                    type="date"
-                    value={editingOffer.date_fin}
-                    onChange={(e) =>
-                      setEditingOffer({
-                        ...editingOffer,
-                        date_fin: e.target.value,
-                      })
-                    }
-                    required
-                  />
-                </div>
-              </div>
-              <div className="flex justify-end space-x-2 mt-4">
-                <Button type="submit">Confirmer</Button>
-                <Button color="gray" onClick={() => setEditingOffer(null)}>
-                  Annuler
-                </Button>
-              </div>
-            </form>
+            <p>
+              Are you sure you want to{" "}
+              {confirmModal.action === "ACCEPTED" ? "accept" : "reject"} this
+              offer?
+            </p>
           </Modal.Body>
+          <Modal.Footer>
+            <Button
+              onClick={() =>
+                handleActionConfirm(confirmModal.idStage!, confirmModal.action!)
+              }
+              color={confirmModal.action === "ACCEPTED" ? "success" : "failure"}
+            >
+              Confirm
+            </Button>
+            <Button
+              color="gray"
+              onClick={() =>
+                setConfirmModal({ isOpen: false, idStage: null, action: null })
+              }
+            >
+              Cancel
+            </Button>
+          </Modal.Footer>
         </Modal>
       )}
     </div>

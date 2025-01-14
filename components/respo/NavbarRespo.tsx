@@ -45,6 +45,7 @@ const NavbarRespo = () => {
         </Navbar.Link>
         <Navbar.Link href={`/respo/affectation`}>Affectation</Navbar.Link>
         <Navbar.Link href={`/respo/stages`}>Stages</Navbar.Link>
+        <Navbar.Link href={`/respo/entreprises`}>Entreprises</Navbar.Link>
       </Navbar.Collapse>
     </Navbar>
   );

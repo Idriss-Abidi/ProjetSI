@@ -1,9 +1,13 @@
 "use client"; // Add this line at the top of your file
 
-import { Avatar, Dropdown, Navbar } from "flowbite-react";
-import React, { use, useState } from "react";
-import { Line, Pie } from "react-chartjs-2";
-import { HiArrowRight } from "react-icons/hi";
+import { Tabs } from "flowbite-react";
+import React from "react";
+import { Pie } from "react-chartjs-2";
+import {
+  HiArrowRight,
+  HiDocumentDuplicate,
+  HiPlusCircle,
+} from "react-icons/hi";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -14,12 +18,13 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import FormComponent from "@/components/Others/FormComponent";
 import OffersListPage from "@/components/entreprise/offersPage";
 import Footer from "@/components/Footer";
 import NavbarEntreprise from "@/components/entreprise/NavbarEntreprise";
 import useFetch from "@/utils/useFetch";
 import { BASE_URL } from "@/constants/baseUrl";
+import FormComponent from "@/components/entreprise/FormComponent";
+import AddTuteurForm from "@/components/entreprise/AddTuteur";
 // import { Pie, Line } from "react-chartjs-2";
 
 ChartJS.register(
@@ -34,6 +39,17 @@ ChartJS.register(
 
 const Page = () => {
   // get id
+  const etudiant = useFetch(`${BASE_URL}/user-info`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+  const etudiantData = etudiant.data;
+  const id = etudiantData?.idGestEntr;
+  // console.log("id howa ", id);
+
   const { data: dataOffres = [] } = useFetch(`${BASE_URL}/stage/all`, {
     method: "GET",
     headers: {
@@ -41,59 +57,73 @@ const Page = () => {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
   });
-  // Data for the charts
+
+  // Check if dataOffres is defined and filter based on idGestEntr
+  const filteredOffres =
+    dataOffres && Array.isArray(dataOffres)
+      ? dataOffres.filter((offre) => offre.gestionnaire.idGestEntr === id)
+      : [];
+  // Data for the first chart (by abbreviation PFA-1A, PFA-2A, PFE)
+  const data1Values = { "PFA-1A": 0, "PFA-2A": 0, PFE: 0 };
+
+  filteredOffres.forEach((offre) => {
+    if (offre.abbreviation === "PFE") {
+      data1Values["PFE"] += 1;
+    } else if (offre.abbreviation === "PFA_1A") {
+      data1Values["PFA-1A"] += 1;
+    } else if (offre.abbreviation === "PFA_2A") {
+      data1Values["PFA-2A"] += 1;
+    }
+  });
+
   const data1 = {
     labels: ["PFA-1A", "PFA-2A", "PFE"],
     datasets: [
       {
-        data: [30, 40, 30],
+        data: [
+          data1Values["PFA-1A"],
+          data1Values["PFA-2A"],
+          data1Values["PFE"],
+        ],
         backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"],
         hoverBackgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"],
       },
     ],
   };
 
-  const data2 = {
-    labels: ["En attente", "Entretiens", "En cour"],
-    datasets: [
-      {
-        data: [70, 20, 10],
-        backgroundColor: ["#4CAF50", "#FFC107", "#F44336"],
-        hoverBackgroundColor: ["#4CAF50", "#FFC107", "#F44336"],
-      },
-    ],
-  };
+  // Data for the second chart (by status)
+  const data2Values = { EN_ATTENTE: 0, ACCEPTE: 0, REFUSE: 0 /*, EXPIRE: 0*/ };
 
-  const lineChartData = {
-    labels: [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ],
+  filteredOffres.forEach((offre) => {
+    if (offre.statut === "EN_ATTENTE") {
+      data2Values["EN_ATTENTE"] += 1;
+    } else if (offre.statut === "ACCEPTE") {
+      data2Values["ACCEPTE"] += 1;
+    } else if (offre.statut === "REFUSE") {
+      data2Values["REFUSE"] += 1;
+    } /*else if (offre.statut === "EXPIRE") {
+      data2Values["EXPIRE"] += 1;
+    }*/
+  });
+
+  const data2 = {
+    labels: ["EN_ATTENTE", "ACCEPTE", "REFUSE" /*"EXPIRE"*/],
     datasets: [
       {
-        label: "Candidatures per Month",
-        data: [5, 10, 8, 15, 20, 25, 30, 18, 22, 28, 35, 40],
-        fill: false,
-        borderColor: "#36A2EB",
-        tension: 0.3,
+        data: [
+          data2Values["EN_ATTENTE"],
+          data2Values["ACCEPTE"],
+          data2Values["REFUSE"],
+          // data2Values["EXPIRE"],
+        ],
+        backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56" /*"gray"*/],
+        hoverBackgroundColor: ["#FF6384", "#36A2EB", "#FFCE56" /*, "#A9A9A9"*/],
       },
     ],
   };
 
   return (
     <div>
-      {/* <NavbarEntreprise /> */}
-
       <div className="container m-auto p-8 ">
         <div className="hero bg-base-200 min-h-[400px]">
           <div className="hero-content flex-col md:flex-row-reverse">
@@ -125,51 +155,52 @@ const Page = () => {
                   </li>
                 </ul>
               </div>
-
+              {/* 
               <a
                 href="#exploreOffers"
                 className="inline-flex items-center rounded-lg border-1 border-black px-2.5 py-1.5 text-center text-3xl font-Large text-dark hover:bg-gray-200/50 hover:text-dark-900"
               >
                 Commencez dès maintenant !
                 <HiArrowRight className="ml-2" />
-              </a>
+              </a> */}
             </div>
           </div>
         </div>
 
         {/* Dashboard */}
-        <div className="grid grid-flow-row-dense grid-row-2 grid-cols-4 gap-0 mb-20 mt-10">
+        <div className="grid grid-flow-row-dense grid-row-2 grid-cols-2 gap-0 mb-20 mt-10">
           <div className=" m-auto row-span-2">
             <h3 className="text-center mb-4 text-xl font-semibold">
-              Stage Types
+              Stage par Type
             </h3>
-            <Pie data={data1} className="w-[250px] h-[250px]" />
-          </div>
-
-          <div className=" col-span-2 row-span-2 m-0">
-            <h3 className="text-center text-xl font-semibold">
-              Candidatures per Month
-            </h3>
-            <Line data={lineChartData} className="w-[480px] h-[270px]" />
+            <Pie data={data1} className="w-[300px] h-[300px]" />
           </div>
 
           <div className=" m-auto row-span-2">
             <h3 className="text-center mb-4 text-xl font-semibold">
-              Status Breakdown
+              Stages par Status
             </h3>
-            <Pie data={data2} className="w-[250px] h-[250px]" />
+            <Pie data={data2} className="w-[300px] h-[300px]" />
           </div>
         </div>
 
         {/* form */}
-
-        <div className="container mx-auto px-4 w-2/3" id="addStage">
-          <FormComponent />
+        <div className="w-2/3 m-auto">
+          <Tabs
+            id="exploreOffers"
+            aria-label="Default tabs"
+            variant="default"
+            className="m-auto my-4 space-x-4  justify-self-center"
+          >
+            <Tabs.Item active title="Offres" icon={HiDocumentDuplicate}>
+              <FormComponent />
+            </Tabs.Item>
+            <Tabs.Item title="Ajouter Tuteur" icon={HiPlusCircle}>
+              <AddTuteurForm />
+            </Tabs.Item>
+          </Tabs>
         </div>
-
-        {/* <OffersListPage /> */}
         {/* footer */}
-        <Footer />
       </div>
     </div>
   );

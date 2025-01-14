@@ -10,6 +10,8 @@ import {
 } from "flowbite-react";
 import { Combobox } from "@headlessui/react";
 import { FaSearch } from "react-icons/fa";
+import { Entretien } from "@/types";
+import { BASE_URL } from "@/constants/baseUrl";
 
 // SearchCards Component
 interface SearchCardsProps {
@@ -29,7 +31,7 @@ const SearchCards: React.FC<SearchCardsProps> = ({ query, setQuery }) => {
             className="w-full h-[48px] pl-16 p-4 rounded-l-full max-sm:rounded-full bg-light-white outline-none cursor-pointer text-sm"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search by title or description..."
+            placeholder="Rechercher par titre ou description..."
           />
         </div>
       </Combobox>
@@ -37,18 +39,8 @@ const SearchCards: React.FC<SearchCardsProps> = ({ query, setQuery }) => {
   );
 };
 
-// CardList Component
-interface CardData {
-  title: string;
-  description: string;
-  date_debut: string;
-  date_fin: string;
-  type: string[];
-  statut: string;
-}
-
 interface CardList3Props {
-  data: CardData[];
+  data: Entretien[];
 }
 
 const StagesList: React.FC<CardList3Props> = ({ data }) => {
@@ -62,26 +54,26 @@ const StagesList: React.FC<CardList3Props> = ({ data }) => {
   const CARDS_PER_PAGE = 9;
 
   // Filter cards based on query, dates, and selected tips
-  const filteredCards = data.filter((card) => {
+  const filteredCards = (data || []).filter((card) => {
     const matchesQuery = query
-      ? `${card.title} ${card.description} ${card.type.join(" ")}`
+      ? `${card.stage.titre} ${card.stage.description} ${card.stage.abbreviation}`
           .toLowerCase()
           .includes(query.toLowerCase())
       : true;
 
-    const cardStartDate = new Date(card.date_debut);
-    const cardEndDate = new Date(card.date_fin);
+    const cardStartDate = new Date(card.stage.dateDebut);
+    const cardEndDate = new Date(card.stage.dateFin);
     const matchesDates =
       (!dateDebut || cardStartDate >= dateDebut) &&
       (!dateFin || cardEndDate <= new Date(dateFin.getTime() + 86400000 - 1));
 
     const matchesTips =
       selectedTips.length === 0 ||
-      selectedTips.some((tip) => card.type.includes(tip));
+      selectedTips.some((tip) => card.stage.abbreviation.includes(tip));
 
     const matchesStats =
       selectedStats.length === 0 ||
-      selectedStats.some((stat) => card.statut.includes(stat));
+      selectedStats.some((stat) => card.statutEntretien.includes(stat));
 
     return matchesQuery && matchesDates && matchesTips && matchesStats;
   });
@@ -106,48 +98,88 @@ const StagesList: React.FC<CardList3Props> = ({ data }) => {
         : [...prev, stat]
     );
   };
+  async function handleSubmit(id_stage: number, id_etudiant: number) {
+    const stage = {
+      id_stage,
+      id_etudiant,
+      noteFinale: "",
+      remarques: "",
+      statutRemarqueStage: "EN_ATTENTE",
+    };
+    const response = await fetch(`${BASE_URL}/remarques-stage`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify(stage), // Directly send the updatedData object
+    });
+    if (response.ok) {
+      const response2 = await fetch(
+        `${BASE_URL}/etudiant/${id_etudiant}/trouve`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      if (response2.ok) {
+        window.location.reload();
+        return;
+      }
+    }
+  }
 
   //   Modal
-  const getModalContent = (statut: string) => {
+  const getModalContent = (
+    id_stage: number,
+    id_etudiant: number,
+    statut: string
+  ) => {
     switch (statut) {
-      case "Accepted":
+      case "ACCEPTE":
         return (
-          <p className="text-green-700">
-            This offer has been <strong>Accepted</strong>. Congratulations!
-            <br />
-            Check your email for more informations.
-          </p>
-          /* <div className="w-2/3 justify-self-center content-center ">
-                  <div>
-                    <Label htmlFor="cv-upload" />
-                  </div>
-                  <FileInput id="cv-upload" sizing="sm" />
-                </div>
-                <Button onClick={() => setOpenModalIndex(null)}>
-                  I accept
-                </Button>
-                <Button color="gray" onClick={() => setOpenModalIndex(null)}>
-                  Decline
-                </Button> */
+          <>
+            <p className="text-green-700 w-2/3">
+              Cette offre a été <strong>acceptée</strong>. Félicitations !
+              <br />
+              Consultez votre email pour plus d'informations.
+            </p>
+            <Button
+              onClick={() => {
+                handleSubmit(id_stage, id_etudiant); // Replace '1' with the appropriate student ID if available
+                // setOpenModalIndex(null);
+              }}
+            >
+              Accepter Stage{" "}
+            </Button>
+          </>
         );
-      case "En att":
+      case "EN_ATTENTE":
         return (
           <p className="text-yellow-700">
-            This offer is still <strong>Pending</strong>. Please wait for
-            further updates.
+            Cette offre est <strong>EN ATTENTE</strong>. Veuillez patienter pour
+            de prochaines mises à jour.
           </p>
         );
-      case "Rejected":
+      case "REFUSE":
         return (
           <p className="text-red-700">
-            This offer has been <strong>Rejected</strong>. Better luck next
-            time!
+            Cette offre a été <strong>refusée</strong>. Bonne chance la
+            prochaine fois !
             <br />
-            Check your email for more informations.
+            Consultez votre email pour plus d'informations.
           </p>
         );
       default:
-        return <p className="text-gray-900">You Canceled your Candiadature</p>;
+        return (
+          <p className="text-red-700">
+            Cette offre est <strong>EN COURS</strong>. Veuillez patienter pour
+            de prochaines mises à jour.
+          </p>
+        );
     }
   };
   return (
@@ -159,12 +191,14 @@ const StagesList: React.FC<CardList3Props> = ({ data }) => {
           // selected={dateDebut}
           onChange={(date: Date | null) => setDateDebut(date)}
           placeholder="Start Date"
+          language="fr-FR"
         />
-        <p className="">to</p>
+        <p className=""> - </p>
         <Datepicker
           // selected={dateFin}
           onChange={(date: Date | null) => setDateFin(date)}
           placeholder="End Date"
+          language="fr-FR"
         />
         <div className="flex items-center gap-4 px-2">
           <Dropdown label="Type Stage" size="sm">
@@ -173,8 +207,8 @@ const StagesList: React.FC<CardList3Props> = ({ data }) => {
                 <input
                   type="checkbox"
                   className="form-checkbox"
-                  onChange={() => handleTipChange("PFA-1A")}
-                  checked={selectedTips.includes("PFA-1A")}
+                  onChange={() => handleTipChange("PFA_1A")}
+                  checked={selectedTips.includes("PFA_1A")}
                 />
                 <span>PFA-1A</span>
               </label>
@@ -182,8 +216,8 @@ const StagesList: React.FC<CardList3Props> = ({ data }) => {
                 <input
                   type="checkbox"
                   className="form-checkbox"
-                  onChange={() => handleTipChange("PFA-2A")}
-                  checked={selectedTips.includes("PFA-2A")}
+                  onChange={() => handleTipChange("PFA_2A")}
+                  checked={selectedTips.includes("PFA_2A")}
                 />
                 <span>PFA-2A</span>
               </label>
@@ -201,53 +235,39 @@ const StagesList: React.FC<CardList3Props> = ({ data }) => {
         </div>
         {/* statut  */}
         <div className="flex items-center gap-4 px-2">
-          <Dropdown label="Stat Stage" size="sm">
+          <Dropdown label="Statut Stage" size="sm">
             <div className="px-4 py-2">
               <label className="flex items-center space-x-2">
                 <input
                   type="checkbox"
                   className="form-checkbox"
-                  onChange={() => handleStatChange("En att")}
-                  checked={selectedStats.includes("En att")}
+                  onChange={() => handleStatChange("ACCEPTE")}
+                  checked={selectedStats.includes("ACCEPTE")}
                 />
-                <span>En att</span>
+                <span>Acceptée</span>
               </label>
               <label className="flex items-center space-x-2">
                 <input
                   type="checkbox"
                   className="form-checkbox"
-                  onChange={() => handleStatChange("Accepted")}
-                  checked={selectedStats.includes("Accepted")}
+                  onChange={() => handleStatChange("REFUSE")}
+                  checked={selectedStats.includes("REFUSE")}
                 />
-                <span>Accepted</span>
+                <span>Refusée</span>
               </label>
               <label className="flex items-center space-x-2">
                 <input
                   type="checkbox"
                   className="form-checkbox"
-                  onChange={() => handleStatChange("Rejected")}
-                  checked={selectedStats.includes("Rejected")}
+                  onChange={() => handleStatChange("EN_COURS")}
+                  checked={selectedStats.includes("EN_COURS")}
                 />
-                <span>Rejected</span>
-              </label>
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  className="form-checkbox"
-                  onChange={() => handleStatChange("Annuler")}
-                  checked={selectedStats.includes("Annuler")}
-                />
-                <span>Annuler</span>
+                <span>En Cours</span>
               </label>
             </div>
           </Dropdown>
         </div>
       </div>
-
-      {/* Search Bar */}
-      {/* <div className="flex items-center space-x-4 py-2 mb-2 m-auto justify-center w-1/3">
-        <SearchCards query={query} setQuery={setQuery} />
-      </div> */}
 
       {/* Card List */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -256,33 +276,37 @@ const StagesList: React.FC<CardList3Props> = ({ data }) => {
             key={index}
             className={`border rounded-md p-4 shadow-md flex flex-col 
                 ${
-                  card.statut === "Accepted"
+                  card.statutEntretien === "ACCEPTE"
                     ? "bg-green-300"
-                    : card.statut === "Rejected"
+                    : card.statutEntretien === "REFUSE"
                     ? "bg-red-300"
-                    : card.statut === "Annuler"
+                    : card.statutEntretien === "EN_COURS"
                     ? "bg-gray-300"
-                    : "bg-yellow-100"
+                    : "hidden"
                 }`}
           >
             <div className="mb-4">
-              <h2 className="text-2xl font-bold text-gray-900">{card.title}</h2>
+              <h2 className="text-2xl font-bold text-gray-900">
+                {card.stage.titre}
+              </h2>
             </div>
             <div className="flex-grow mb-4">
-              <p className="text-gray-700 mt-2">{card.description}</p>
+              <p className="text-gray-700 mt-2">{card.stage.description}</p>
             </div>
             <div className="mt-auto">
               <p className="text-gray-700 mt-2 font-bold">
-                {card.date_debut} - {card.date_fin} : {card.statut}
+                {card.stage.dateDebut.replaceAll("-", "/").split("T")[0]} -{" "}
+                {card.stage.dateFin.replaceAll("-", "/").split("T")[0]} :{" "}
+                {card.statutEntretien}
               </p>
-              {/* <div className="mt-2">
-                <strong>Tips:</strong> {card.tips.join(", ")}
-              </div> */}
+              <div className="mt-2">
+                <strong>Tags:</strong> {card.stage.tags}
+              </div>
               <Button
                 className="mt-4 w-1/3"
                 onClick={() => setOpenModalIndex(startIndex + index)}
               >
-                Read more
+                Voir
               </Button>
             </div>
             <Modal
@@ -290,33 +314,23 @@ const StagesList: React.FC<CardList3Props> = ({ data }) => {
               show={openModalIndex === startIndex + index}
               onClose={() => setOpenModalIndex(null)}
             >
-              <Modal.Header>{card.title}</Modal.Header>
+              <Modal.Header>{card.stage.titre}</Modal.Header>
               <Modal.Body>
                 <div className="space-y-6">
                   <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
-                    {card.description}
+                    {card.stage.description}
                   </p>
                   <ul className="list-disc pl-5 text-gray-500">
-                    {card.type.map((tip, tipIndex) => (
-                      <li key={tipIndex}>{tip}</li>
-                    ))}
+                    <li>{card.stage.abbreviation}</li>
                   </ul>
                 </div>
               </Modal.Body>
               <Modal.Footer>
-                {/* <div className="w-2/3 justify-self-center content-center ">
-                  <div>
-                    <Label htmlFor="cv-upload" />
-                  </div>
-                  <FileInput id="cv-upload" sizing="sm" />
-                </div>
-                <Button onClick={() => setOpenModalIndex(null)}>
-                  I accept
-                </Button>
-                <Button color="gray" onClick={() => setOpenModalIndex(null)}>
-                  Decline
-                </Button> */}
-                {getModalContent(card.statut)}
+                {getModalContent(
+                  card.stage.idStage,
+                  card.etudiant.idEtudiant,
+                  card.statutEntretien
+                )}
               </Modal.Footer>
             </Modal>
           </div>

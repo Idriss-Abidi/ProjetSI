@@ -7,27 +7,30 @@ import { HiAdjustments, HiUserCircle } from "react-icons/hi";
 import EtudiantsList from "@/components/ecole/EtudiantsList";
 import NavbarEcole from "@/components/ecole/NavbarEcole";
 import AddEtudiantForm from "@/components/ecole/addEtudiant";
+import { BASE_URL } from "@/constants/baseUrl";
 
-const Page = ({ params }: { params: Promise<{ id_admin: string }> }) => {
+const Page = () => {
   const [etudiantsData, setDataEtudiants] = useState([]);
-  const [dataStages, setDataStages] = useState([]);
   // Convert id_gest_entr to an integer
-  const { id_admin } = use(params);
-  const idGestEntr = parseInt(id_admin, 10); // Convert string to integer
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const etudiantsResponse = await fetch("/db/etudiant_full.json");
-        const etudiantsData = await etudiantsResponse.json();
-        setDataEtudiants(etudiantsData);
-
-        const stagesResponse = await fetch("/db/stage_offre.json");
-        const stagesData = await stagesResponse.json();
-        const filteredStages = stagesData.filter(
-          (stage: { statut: string }) => stage.statut === "En att"
-        );
-        setDataStages(filteredStages);
+        // Fetch all remarks-stage data
+        const etudiantResponse = await fetch(`${BASE_URL}/etudiant/all`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        if (!etudiantResponse.ok) {
+          throw new Error(
+            `Failed to fetch remarks-stage data: ${etudiantResponse.statusText}`
+          );
+        }
+        const allEtudiant = await etudiantResponse.json(); // Parse JSON response
+        setDataEtudiants(allEtudiant);
       } catch (error) {
         console.error("Error fetching data:", error);
       }

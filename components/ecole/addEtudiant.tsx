@@ -1,18 +1,50 @@
-import { useState } from "react";
+import { BASE_URL } from "@/constants/baseUrl";
+import { Filiere } from "@/types";
+import { useState, useEffect } from "react";
 
 const AddEtudiantForm = () => {
   const [formData, setFormData] = useState({
-    CNE: "",
-    promo: "",
-    niveau: "",
-    filiere: "",
     nom: "",
     prenom: "",
     email: "",
+    password: "",
+    userType: "ETUDIANT", // valeurs possibles: RESPO_STAGE, ADMIN_ECOLE, ETUDIANT, PROFESSEUR, GEST_ENTRE, TUTEUR
+    cne: "",
+    promo: "",
+    niveau: "",
+    filiere: null,
     tel: "",
-    statut: 0,
-    userType: "ETUDIANT",
   });
+
+  const [filieres, setFilieres] = useState([]);
+  const [loadingFilieres, setLoadingFilieres] = useState(true);
+
+  useEffect(() => {
+    const fetchFilieres = async () => {
+      try {
+        const response = await fetch(`${BASE_URL}/filiere/all`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setFilieres(data);
+        } else {
+          console.error("Failed to fetch filieres");
+        }
+      } catch (error) {
+        console.error("Error fetching filieres:", error);
+      } finally {
+        setLoadingFilieres(false);
+      }
+    };
+
+    fetchFilieres();
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -24,45 +56,68 @@ const AddEtudiantForm = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Create the JSON object from form data
-    const updatedData = {
-      CNE: formData.CNE,
+    const newEtudiant = {
+      cne: formData.cne,
       promo: formData.promo,
       niveau: formData.niveau,
-      filiere: formData.filiere,
+      id_filiere: formData.filiere,
       nom: formData.nom,
       prenom: formData.prenom,
+      password: formData.cne, // Assuming password is CNE by default
       email: formData.email,
       tel: formData.tel,
-      statut: formData.statut,
       userType: formData.userType,
     };
 
-    console.log(updatedData); // Log the updated data as a JSON object
+    console.log(newEtudiant);
+
+    // Uncomment to submit the form data
+    try {
+      const response = await fetch(`${BASE_URL}/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify(newEtudiant),
+      });
+
+      if (response.ok) {
+        alert("Data submitted successfully!");
+        window.location.reload();
+      } else {
+        const errorData = await response.json();
+        console.error("Error submitting data:", errorData);
+        alert("Failed to submit data. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error submitting data:", error);
+      alert("Failed to submit data. Please try again.");
+    }
   };
 
   return (
     <div className="max-w-xl mx-auto mt-10">
       <form
         onSubmit={handleSubmit}
-        className="space-y26 bg-white p-2 rounded-lg shadow-lg"
+        className="space-y-6 bg-white p-4 rounded-lg shadow-lg"
       >
         {/* CNE */}
         <div>
           <label
-            htmlFor="CNE"
+            htmlFor="cne"
             className="block text-sm font-medium text-gray-700"
           >
             CNE
           </label>
           <input
             type="text"
-            name="CNE"
-            id="CNE"
-            value={formData.CNE}
+            name="cne"
+            id="cne"
+            value={formData.cne}
             onChange={handleChange}
             placeholder="Enter CNE"
             required
@@ -106,6 +161,7 @@ const AddEtudiantForm = () => {
             required
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
+            <option value="">Select Niveau...</option>
             <option value="1A">1A</option>
             <option value="2A">2A</option>
             <option value="3A">3A</option>
@@ -123,17 +179,18 @@ const AddEtudiantForm = () => {
           <select
             name="filiere"
             id="filiere"
-            value={formData.filiere}
+            value={formData?.filiere || ""}
             onChange={handleChange}
             required
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={loadingFilieres}
           >
-            <option value="GL">GL</option>
-            <option value="GD">GD</option>
-            <option value="IDSIT">IDSIT</option>
-            <option value="SSE">SSE</option>
-            <option value="SSI">SSI</option>
-            <option value="2IA">2IA</option>
+            <option value="">Select Filière...</option>
+            {filieres.map((filiere: Filiere) => (
+              <option key={filiere.idFiliere} value={filiere.idFiliere}>
+                {filiere.nomFiliere} - {filiere.abbreviation}
+              </option>
+            ))}
           </select>
         </div>
 

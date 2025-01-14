@@ -1,52 +1,21 @@
 "use client";
 
+import { Gestionnaire } from "@/types";
 import { Avatar, Dropdown, Navbar } from "flowbite-react";
-import React, { useEffect, useState } from "react";
+import React from "react";
 
-const NavbarEntreprise = ({ id }: { id: number }) => {
-  const [dataGestEnt, setDataGestEnt] = useState<any>(null); // Fixing the type
-  const [gestEnt, setGestEnt] = useState({
-    nom: "",
-    prenom: "",
-    email: "",
-  });
-  const { nom, prenom, email } = gestEnt;
+type NavbarEtudiantProps = {
+  entreprise: Gestionnaire;
+};
 
-  const loadGestEnt = async () => {
-    try {
-      const gestEntResponse = await fetch(
-        "/db/gestionnaire_entreprise_full.json"
-      );
-      const gestEntData = await gestEntResponse.json();
-      const filteredGestEnt = gestEntData.filter(
-        (gestEnt: { id_gest_entr: number }) => gestEnt.id_gest_entr === id
-      );
-      if (filteredGestEnt.length > 0) {
-        setDataGestEnt(filteredGestEnt[0]); // Take the first match
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
-
-  useEffect(() => {
-    loadGestEnt();
-  }, [id]); // Load data when 'id' changes
-
-  useEffect(() => {
-    if (dataGestEnt) {
-      setGestEnt({
-        nom: dataGestEnt.nom,
-        prenom: dataGestEnt.prenom,
-        email: dataGestEnt.email,
-      });
-    }
-  }, [dataGestEnt]); // Update gestEnt when dataGestEnt is fetched
-
+const NavbarEntreprise = ({ entreprise }: NavbarEtudiantProps) => {
+  if (!entreprise) {
+    return <div></div>; // Render a loading state if entreprise is not available
+  }
   return (
     <div>
       <Navbar fluid rounded className="m-auto w-[90%]">
-        <Navbar.Brand href={`/entreprise/${id}`}>
+        <Navbar.Brand href={`/entreprise`}>
           <div className="flex items-center">
             <img
               src="/logo_app.png" // Replace with the path to your logo
@@ -54,7 +23,7 @@ const NavbarEntreprise = ({ id }: { id: number }) => {
               className="h-14 mr-2" // Adjust size and spacing
             />
             <span className="self-center whitespace-nowrap text-xl font-semibold dark:text-white">
-              ENSIAS-STAGES
+              ECS
             </span>
           </div>
         </Navbar.Brand>
@@ -73,27 +42,25 @@ const NavbarEntreprise = ({ id }: { id: number }) => {
           >
             <Dropdown.Header>
               <span className="block text-sm">
-                {nom} {prenom}
+                {entreprise.user.nom} {entreprise.user.prenom}
               </span>
               <span className="block truncate text-sm font-medium">
-                {email}
+                {entreprise.user.email}
               </span>
             </Dropdown.Header>
-            <Dropdown.Item href={`/entreprise/${id}`}>Acceuil</Dropdown.Item>
-            <Dropdown.Item href="#">Profil</Dropdown.Item>
+            <Dropdown.Item href={`/entreprise`}>Acceuil</Dropdown.Item>
+            {/* <Dropdown.Item href="#">Profil</Dropdown.Item> */}
             <Dropdown.Divider />
-            <Dropdown.Item href="/login">Sign out</Dropdown.Item>
+            <Dropdown.Item href="/login">Se déconnecter</Dropdown.Item>
           </Dropdown>
           <Navbar.Toggle />
         </div>
         <Navbar.Collapse>
-          <Navbar.Link href={`/entreprise/${id}`} active>
+          <Navbar.Link href={`/entreprise`} active>
             Acceuil
           </Navbar.Link>
-          <Navbar.Link href={`/entreprise/${id}/offres`}>Offres</Navbar.Link>
-          <Navbar.Link href={`/entreprise/${id}/entretien`}>
-            Entretiens
-          </Navbar.Link>
+          <Navbar.Link href={`/entreprise/offres`}>Offres</Navbar.Link>
+          <Navbar.Link href={`/entreprise/entretien`}>Entretiens</Navbar.Link>
         </Navbar.Collapse>
       </Navbar>
     </div>

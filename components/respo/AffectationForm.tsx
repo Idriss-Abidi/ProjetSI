@@ -1,41 +1,18 @@
 import { useState, useEffect } from "react";
 import { Modal, Button, Label, Dropdown } from "flowbite-react";
-
-interface Offer {
-  id: number;
-  title: string;
-  description: string;
-  type: string[]; // list of types
-  tags: string[];
-  date_debut: string;
-  date_fin: string;
-  statut: string;
-}
-
-interface Etudiant {
-  id_etudiant: number;
-  id_user: number;
-  CNE: string;
-  promo: string;
-  niveau: string;
-  filiere: string;
-  nom: string;
-  prenom: string;
-  email: string;
-  password: string;
-  userType: "ETUDIANT";
-  tel: string;
-}
+import { Etudiant, Stage } from "@/types";
+import axios from "axios";
+import { BASE_URL } from "@/constants/baseUrl";
 
 interface DataList {
-  data: Offer[];
+  data: Stage[];
   etds: Etudiant[];
 }
 
 const AffectationForm: React.FC<DataList> = ({ data, etds }) => {
-  const [offers, setOffers] = useState<Offer[]>([]);
+  const [offers, setOffers] = useState<Stage[]>([]);
   const [etudiants, setEtudiants] = useState<Etudiant[]>([]);
-  const [editingOffer, setEditingOffer] = useState<Offer | null>(null);
+  const [editingOffer, setEditingOffer] = useState<Stage | null>(null);
   const [selectedEtudiants, setSelectedEtudiants] = useState<number[]>([]);
   const [selectedNiveau, setSelectedNiveau] = useState<string[]>([]);
   const [selectedFiliere, setSelectedFiliere] = useState<string[]>([]);
@@ -50,7 +27,8 @@ const AffectationForm: React.FC<DataList> = ({ data, etds }) => {
     const filteredEtudiants = etudiants.filter(
       (etudiant) =>
         (selectedFiliere.length === 0 ||
-          selectedFiliere.includes(etudiant.filiere)) &&
+          //@ts-ignore
+          selectedFiliere.includes(etudiant.filiere?.abbreviation)) &&
         (selectedNiveau.length === 0 ||
           selectedNiveau.includes(etudiant.niveau))
     );
@@ -60,7 +38,7 @@ const AffectationForm: React.FC<DataList> = ({ data, etds }) => {
     setSelectedEtudiants(
       isAllSelected
         ? []
-        : filteredEtudiants.map((etudiant) => etudiant.id_etudiant)
+        : filteredEtudiants.map((etudiant) => etudiant.idEtudiant)
     );
   };
 
@@ -94,12 +72,28 @@ const AffectationForm: React.FC<DataList> = ({ data, etds }) => {
     );
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (editingOffer) {
       const selectedData = {
-        offerId: editingOffer.id,
-        etudiants: selectedEtudiants,
+        id_stage: editingOffer.idStage,
+        id_etudiants: selectedEtudiants,
       };
+
+      try {
+        const response = await fetch(`${BASE_URL}/affectation`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify(selectedData),
+        });
+
+        alert("Data submitted successfully!");
+      } catch (error) {
+        console.error("Error submitting data:", error);
+        alert("Failed to submit data. Please try again.");
+      }
       console.log("Offer and Selected Etudiants:", selectedData);
     }
   };
@@ -111,7 +105,10 @@ const AffectationForm: React.FC<DataList> = ({ data, etds }) => {
 
     const etudiantFiliere =
       selectedFiliere.length === 0 ||
-      selectedFiliere.some((filiere) => etudiant.filiere.includes(filiere));
+      selectedFiliere.some(
+        (filiere) =>
+          etudiant.filiere && etudiant.filiere.abbreviation.includes(filiere)
+      );
 
     return etudiantNiveau && etudiantFiliere;
   });
@@ -122,16 +119,19 @@ const AffectationForm: React.FC<DataList> = ({ data, etds }) => {
       <div className="space-y-4">
         {offers.map((offer) => (
           <div
-            key={offer.id}
+            key={offer.idStage}
             className="flex justify-between items-center p-4 border rounded"
           >
             <div>
-              <h3 className="text-lg font-semibold">{offer.title}</h3>
+              <h3 className="text-lg font-semibold">{offer.titre}</h3>
               <p>Description: {offer.description}</p>
-              <p>Types: {offer.type.join(", ")}</p>
-              <p>Tags: {offer.tags.join(", ")}</p>
-              <p>Date Debut: {offer.date_debut}</p>
-              <p>Date Fin: {offer.date_fin}</p>
+              <p>Types: {offer.abbreviation}</p>
+              <p>
+                Tags:{" "}
+                {offer.tags ? offer.tags.split(", ") : "No tags available"}
+              </p>
+              <p>Date Debut: {offer.dateDebut}</p>
+              <p>Date Fin: {offer.dateFin}</p>
               <p>Status: {offer.statut}</p>
             </div>
             <div className="flex space-x-2">
@@ -151,19 +151,21 @@ const AffectationForm: React.FC<DataList> = ({ data, etds }) => {
               {/* Filter by Filière */}
 
               <Dropdown label="Filière" size="sm">
-                {["GL", "GD", "IDSIT", "SSE", "SSI", "2IA"].map((filiere) => (
-                  <div key={filiere} className="px-4 py-2">
-                    <label className="flex items-center text-sm space-x-2">
-                      <input
-                        type="checkbox"
-                        className="form-checkbox"
-                        onChange={() => handleFiliereChange(filiere)}
-                        checked={selectedFiliere.includes(filiere)}
-                      />
-                      <span>{filiere}</span>
-                    </label>
-                  </div>
-                ))}
+                {["GL", "GD", "IDSIT", "SSE", "SSI", "2IA", "2SCL"].map(
+                  (filiere) => (
+                    <div key={filiere} className="px-4 py-2">
+                      <label className="flex items-center text-sm space-x-2">
+                        <input
+                          type="checkbox"
+                          className="form-checkbox"
+                          onChange={() => handleFiliereChange(filiere)}
+                          checked={selectedFiliere.includes(filiere)}
+                        />
+                        <span>{filiere}</span>
+                      </label>
+                    </div>
+                  )
+                )}
               </Dropdown>
 
               {/* Filter by Niveau */}
@@ -203,21 +205,22 @@ const AffectationForm: React.FC<DataList> = ({ data, etds }) => {
             <div className="space-y-4">
               {filteredEtudiants.map((etudiant) => (
                 <div
-                  key={etudiant.id_etudiant}
+                  key={etudiant.idEtudiant}
                   className="flex items-center space-x-4"
                 >
                   <input
                     type="checkbox"
-                    checked={selectedEtudiants.includes(etudiant.id_etudiant)}
+                    checked={selectedEtudiants.includes(etudiant.idEtudiant)}
                     onChange={() =>
-                      handleEtudiantSelection(etudiant.id_etudiant)
+                      handleEtudiantSelection(etudiant.idEtudiant)
                     }
-                    id={`etudiant-${etudiant.id_etudiant}`}
+                    id={`etudiant-${etudiant.idEtudiant}`}
                     className="mr-2"
                   />
-                  <label htmlFor={`etudiant-${etudiant.id_etudiant}`}>
-                    {etudiant.nom} {etudiant.prenom} - Niveau: {etudiant.niveau}{" "}
-                    - Filière: {etudiant.filiere}
+                  <label htmlFor={`etudiant-${etudiant.idEtudiant}`}>
+                    {etudiant.user.nom} {etudiant.user.prenom} - Niveau:{" "}
+                    {etudiant.niveau} - Filière:{" "}
+                    {etudiant.filiere?.abbreviation}
                   </label>
                 </div>
               ))}

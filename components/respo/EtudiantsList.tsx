@@ -1,21 +1,6 @@
 import { useState, useEffect } from "react";
 import { Modal, Button, Label, Dropdown } from "flowbite-react";
-
-interface Etudiant {
-  id_etudiant: number;
-  id_user: number;
-  CNE: string;
-  promo: string;
-  niveau: string;
-  filiere: string;
-  nom: string;
-  prenom: string;
-  email: string;
-  password: string;
-  userType: "ETUDIANT";
-  tel: string;
-  statut: number;
-}
+import { Etudiant } from "@/types";
 
 const EtudiantsList: React.FC<{ data: Etudiant[] }> = ({ data }) => {
   const [etudiants, setEtudiants] = useState<Etudiant[]>([]);
@@ -58,10 +43,12 @@ const EtudiantsList: React.FC<{ data: Etudiant[] }> = ({ data }) => {
 
     const etudiantFiliere =
       selectedFiliere.length === 0 ||
-      selectedFiliere.some((filiere) => etudiant.filiere.includes(filiere));
+      selectedFiliere.some((filiere) =>
+        etudiant.filiere?.abbreviation.includes(filiere)
+      );
 
-    const etudiantStatut =
-      selectedStatut.length === 0 || selectedStatut.includes(etudiant.statut);
+    const etudiantStatut = selectedStatut.length === 0;
+    //  || selectedStatut.includes(etudiant.statut);
 
     return etudiantNiveau && etudiantFiliere && etudiantStatut;
   });
@@ -73,19 +60,21 @@ const EtudiantsList: React.FC<{ data: Etudiant[] }> = ({ data }) => {
         <div className="flex space-x-4 mb-4 w-full">
           {/* Filter by Filière */}
           <Dropdown label="Filière" size="sm">
-            {["GL", "GD", "IDSIT", "SSE", "SSI", "2IA"].map((filiere) => (
-              <div key={filiere} className="px-4 py-2">
-                <label className="flex items-center text-sm space-x-2">
-                  <input
-                    type="checkbox"
-                    className="form-checkbox"
-                    onChange={() => handleFiliereChange(filiere)}
-                    checked={selectedFiliere.includes(filiere)}
-                  />
-                  <span>{filiere}</span>
-                </label>
-              </div>
-            ))}
+            {["GL", "GD", "IDSIT", "SSE", "SSI", "2IA", "2SCL"].map(
+              (filiere) => (
+                <div key={filiere} className="px-4 py-2">
+                  <label className="flex items-center text-sm space-x-2">
+                    <input
+                      type="checkbox"
+                      className="form-checkbox"
+                      onChange={() => handleFiliereChange(filiere)}
+                      checked={selectedFiliere.includes(filiere)}
+                    />
+                    <span>{filiere}</span>
+                  </label>
+                </div>
+              )
+            )}
           </Dropdown>
 
           {/* Filter by Niveau */}
@@ -129,12 +118,12 @@ const EtudiantsList: React.FC<{ data: Etudiant[] }> = ({ data }) => {
         <div className="space-y-4">
           {filteredEtudiants.map((etudiant) => (
             <div
-              key={etudiant.id_etudiant}
+              key={etudiant.idEtudiant}
               className="flex justify-between w-1/2 items-center p-4 border rounded"
             >
-              <label htmlFor={`etudiant-${etudiant.id_etudiant}`}>
-                {etudiant.nom} {etudiant.prenom} - Niveau: {etudiant.niveau} -
-                Filière: {etudiant.filiere}
+              <label htmlFor={`etudiant-${etudiant.idEtudiant}`}>
+                {etudiant.user.nom} {etudiant.user.nom} - Niveau:{" "}
+                {etudiant.niveau} - Filière: {etudiant.filiere?.abbreviation}
               </label>
             </div>
           ))}

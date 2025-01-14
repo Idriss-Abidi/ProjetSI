@@ -8,9 +8,14 @@ import {
   Label,
   FileInput,
   TextInput,
+  Card,
 } from "flowbite-react";
 import { Combobox } from "@headlessui/react";
 import { FaSearch } from "react-icons/fa";
+import { Convention, RemarqueStage } from "@/types";
+import { BASE_URL } from "@/constants/baseUrl";
+import ConventionButton from "./ConventionButton";
+import PdfFormFiller from "./ConventionButton";
 // SearchCards Component
 interface SearchCardsProps {
   query: string;
@@ -35,54 +40,11 @@ const SearchCards: React.FC<SearchCardsProps> = ({ query, setQuery }) => {
     </div>
   );
 };
-interface Convention {
-  CodeConvention: string;
-  id_etudiant: number; // Changed to number
-  id_offre: number; // Changed to number
-  id_tuteur: number; // Changed to number
-  id_entreprise: number; // Changed to number
+
+interface CardListProps {
+  data: RemarqueStage[];
 }
-
-interface CardData {
-  id_stage: number;
-  title: string;
-  description: string;
-  date_debut: string;
-  date_fin: string;
-  type: string[]; // Array of types (e.g., "PFA-1A")
-  tags: string[]; // Array of tags (e.g., "React Native", "Swift")
-  id_etudiant: number;
-  CNE: string;
-  promo: string;
-  niveau: string;
-  filiere: string;
-  nom: string;
-  prenom: string;
-  email: string;
-  password: string;
-  userType: string; // Restricted to the value "ETUDIANT"
-  tel: string;
-  statut_etudiant: number; // 0 or 1
-  statut: string; // En att, start, Interrupted, end
-  conventionCode: string;
-
-  id_tuteur: number;
-  nom_tuteur: string;
-  prenom_tuteur: string;
-  email_tuteur: string;
-  tel_tuteur: string;
-  note: number | null;
-  remarques: string;
-
-  id_entreprise: number;
-  entreprise: string;
-}
-
-interface CardList3Props {
-  data: CardData[];
-}
-
-const CardList: React.FC<CardList3Props> = ({ data }) => {
+const StagesList: React.FC<CardListProps> = ({ data }) => {
   const [openModalIndex, setOpenModalIndex] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [query, setQuery] = useState("");
@@ -90,7 +52,6 @@ const CardList: React.FC<CardList3Props> = ({ data }) => {
   const [dateFin, setDateFin] = useState<Date | null>(null);
   const [selectedTips, setSelectedTips] = useState<string[]>([]);
   const [conventionPath, setConventionPath] = useState<string>("");
-  const [conventionCode, setConventionCode] = useState<string>("");
   const [selectedConvention, setSelectedConvention] =
     useState<Convention | null>(null);
 
@@ -99,20 +60,18 @@ const CardList: React.FC<CardList3Props> = ({ data }) => {
   // Filter cards based on query, dates, and selected tips
   const filteredCards = data.filter((card) => {
     const matchesQuery = query
-      ? `${card.title} ${card.nom} ${card.prenom} ${card.entreprise} ${
-          card.nom_tuteur
-        } ${card.prenom_tuteur} ${card.type.join(" ")}`
+      ? `${card.stage.titre} ${card.etudiant.user.nom} ${card.etudiant.user.prenom} ${card.stage.gestionnaire.entreprise.nomEntreprise} ${card.stage.tuteur.user.nom} ${card.stage.tuteur.user.prenom} ${card.etudiant.niveau}`
           .toLowerCase()
           .includes(query.toLowerCase())
       : true;
-    const cardStartDate = new Date(card.date_debut);
-    const cardEndDate = new Date(card.date_fin);
+    const cardStartDate = new Date(card.stage.dateDebut);
+    const cardEndDate = new Date(card.stage.dateFin);
     const matchesDates =
       (!dateDebut || cardStartDate >= dateDebut) &&
       (!dateFin || cardEndDate <= new Date(dateFin.getTime() + 86400000 - 1));
     const matchesTips =
       selectedTips.length === 0 ||
-      selectedTips.some((tip) => card.type.includes(tip));
+      selectedTips.some((tip) => card.stage.abbreviation.includes(tip));
     return matchesQuery && matchesDates && matchesTips;
   });
 
@@ -137,42 +96,65 @@ const CardList: React.FC<CardList3Props> = ({ data }) => {
     }
   };
 
-  // Handle convention code input change
-  const handleCodeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setConventionCode(event.target.value);
-  };
-
-  const handleConfirmClick = (
+  const handleConfirmClick = async (
     // selectedConvention: Convention | null, // Convention data
-    selectedStage: CardData, // Stage data
-    conventionPath: string, // Path of the convention file
-    conventionCode: string // Code of the convention
+    // selectedStage: number, // Stage data
+    conventionPdf: string, // Path of the convention file
+    selectedStage: RemarqueStage
   ) => {
-    if (conventionCode) {
-      // First JSON: stageJson
-      const stageJson = {
-        CodeConvention: conventionCode, // Use user input or selected
-        id_stage: selectedStage.id_stage,
-        id_etudiant: selectedStage.id_etudiant,
-        statut: "start",
-        statut_etudiant: 1,
-      };
-
+    if (conventionPdf) {
       // Second JSON: conventionJson
       const conventionJson = {
-        CodeConvention: conventionCode, // Use user input or selected
-        path: conventionPath,
-        id_etudiant: selectedStage.id_etudiant,
-        id_tuteur: selectedStage.id_tuteur,
-        id_entreprise: selectedStage.id_entreprise,
-        id_stage: selectedStage.id_stage,
+        // Use user input or selected
+        conventionPdf,
+        id_etudiant: selectedStage.etudiant.idEtudiant,
+        id_tuteur: selectedStage.stage.tuteur.idTuteur,
+        id_stage: selectedStage.stage.idStage,
+        dateDebut: selectedStage.stage.dateDebut,
+        dateFin: selectedStage.stage.dateFin,
+        sujet: selectedStage.stage.titre,
       };
 
-      console.log("Stage JSON:", JSON.stringify(stageJson, null, 2)); // Log the first JSON
+      const response1 = await fetch(
+        `${BASE_URL}/remarques-stage/${selectedStage.idRemarque}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({
+            statutRemarqueStage: "EN_COURS",
+          }),
+        }
+      );
+
+      if (!response1.ok) {
+        console.error("Error accepting stage:", response1.statusText);
+        return;
+      }
       console.log("Convention JSON:", JSON.stringify(conventionJson, null, 2)); // Log the second JSON
 
-      setConventionCode(""); // Clear convention code input
-      setConventionPath(""); // Clear convention path (file name or path)
+      // Schedule an interview
+      const response2 = await fetch(`${BASE_URL}/convention`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify(conventionJson, null, 2),
+      });
+
+      if (!response2.ok) {
+        console.error("Error convention:", response2.statusText);
+        return;
+      }
+
+      if (response2.ok && response2.ok) {
+        setConventionPath("");
+        window.location.reload();
+      }
+      // Clear convention path (file name or path)
       // Here you can send the generated JSON to an API or perform further actions
       alert("Done");
     }
@@ -238,21 +220,22 @@ const CardList: React.FC<CardList3Props> = ({ data }) => {
           >
             <div className="mb-4">
               <h5 className="text-xl font-bold text-gray-900">
-                Stage : {card.title}
+                Stage : {card.stage.titre}
               </h5>
               <h5 className="text-xl font-bold text-gray-900">
-                Entreprise : {card.entreprise}
+                Entreprise : {card.stage.gestionnaire.entreprise.nomEntreprise}
               </h5>
               <h5 className="text-xl font-bold text-gray-900">
-                Etudiant : {card.nom} {card.prenom}
+                Etudiant : {card.etudiant.user.nom} {card.etudiant.user.prenom}
               </h5>
               <h5 className="text-xl font-bold text-gray-900">
-                Tuteur : {card.nom_tuteur} {card.prenom_tuteur}
+                Tuteur : {card.stage.tuteur.user.nom}{" "}
+                {card.stage.tuteur.user.prenom}
               </h5>
             </div>
             <div className="mt-auto">
               <p className="text-gray-700 mt-2 font-bold">
-                {card.date_debut} - {card.date_fin}
+                {card.stage.dateDebut} - {card.stage.dateFin}
               </p>
               {/* <div className="mt-2">
                 <strong>Tips:</strong> {card.tips.join(", ")}
@@ -269,78 +252,63 @@ const CardList: React.FC<CardList3Props> = ({ data }) => {
               show={openModalIndex === startIndex + index}
               onClose={() => setOpenModalIndex(null)}
             >
-              <Modal.Header>{card.title}</Modal.Header>
+              <Modal.Header>{card.stage.titre}</Modal.Header>
               <Modal.Body>
                 <div className="space-y-6">
                   <div className="mt-auto">
                     <h5 className="text-md font-bold text-gray-900">
-                      Stage : {card.title}
+                      Stage : {card.stage.titre}
                     </h5>
                     <h5 className="text-md font-bold text-gray-900">
-                      Entreprise : {card.entreprise}
+                      Entreprise :{" "}
+                      {card.stage.gestionnaire.entreprise.nomEntreprise}
                     </h5>
                     <h5 className="text-md font-bold text-gray-900">
-                      Etudiant : {card.nom} {card.prenom}
+                      Etudiant : {card.etudiant.user.nom}{" "}
+                      {card.etudiant.user.prenom}
                     </h5>
                     <h5 className="text-md font-bold text-gray-900">
-                      Tuteur : {card.nom_tuteur} {card.prenom_tuteur}
+                      Tuteur : {card.stage.tuteur.user.nom}{" "}
+                      {card.stage.tuteur.user.prenom}
                     </h5>
                     <p className="text-gray-700 font-bold">
-                      Duree : {card.date_debut} - {card.date_fin}
+                      Duree : {card.stage.dateDebut} - {card.stage.dateFin}
                     </p>
                     <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
-                      {card.description}
+                      {card.stage.description}
                     </p>
                     <ul className="list-disc pl-5 text-gray-500">
-                      {card.type.map((tip, tipIndex) => (
-                        <li key={tipIndex}>{tip}</li>
-                      ))}
+                      {card.stage.abbreviation}
                     </ul>
                   </div>
                 </div>
               </Modal.Body>
               <Modal.Footer>
                 {/* Convention File Upload */}
-                <div className="w-2/3 justify-self-center content-center">
+                <div className="justify-self-center content-center">
                   <div>
                     <Label
                       htmlFor="convention-upload"
                       className="text-gray-700"
                     >
-                      Upload Convention
+                      Générer Convention
                     </Label>
                   </div>
-                  <FileInput
-                    id="convention-upload"
-                    sizing="sm"
-                    onChange={handleFileChange} // Handle file input change
+                  <PdfFormFiller
+                    etudiant={`${card.etudiant.user.nom} ${card.etudiant.user.prenom}`}
+                    entreprise={
+                      card.stage.gestionnaire.entreprise.nomEntreprise
+                    }
+                    sujet={card.stage.titre}
                   />
                 </div>
-
-                {/* Convention Code Input */}
-                <div className="mt-4">
-                  <Label htmlFor="convention-code" className="text-gray-700">
-                    Convention Code
-                  </Label>
-                  <TextInput
-                    id="convention-code"
-                    value={conventionCode}
-                    onChange={handleCodeChange}
-                    placeholder="Enter Convention Code"
-                    sizing="sm"
-                    required
-                  />
-                </div>
-
                 {/* Action Buttons */}
                 <div className="flex justify-between mt-6">
                   <Button
                     onClick={() =>
                       handleConfirmClick(
-                        // selectedConvention, // Ensure selectedConvention is defined correctly, maybe passed as a prop or state
-                        card, // Card data passed to the function
                         conventionPath,
-                        conventionCode
+                        card // Card data passed to the function
                       )
                     }
                     className="w-full sm:w-auto"
@@ -374,4 +342,4 @@ const CardList: React.FC<CardList3Props> = ({ data }) => {
     </div>
   );
 };
-export default CardList;
+export default StagesList;

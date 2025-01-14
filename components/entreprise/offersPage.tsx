@@ -1,41 +1,19 @@
 import { useState, useEffect } from "react";
-import { Modal, Button, TextInput, Label, Toast, Alert } from "flowbite-react";
-import { HiCheck } from "react-icons/hi";
-
-interface Offer {
-  id: number;
-  title: string;
-  description: string;
-  type: string[];
-  tags: string[];
-  date_debut: string;
-  date_fin: string;
-}
-
-interface Candidature {
-  id_etudiant: number;
-  nom: string;
-  prenom: string;
-  cv_path: string;
-  statut: string;
-  id_offre: number;
-}
+import { Modal, Button } from "flowbite-react";
+import { Candidature, Stage } from "@/types";
+import { BASE_URL } from "@/constants/baseUrl";
 
 interface DataList {
-  data: Offer[];
+  data: Stage[];
   dataCandidatures: Candidature[];
 }
 
 const OffersListPage: React.FC<DataList> = ({ data, dataCandidatures }) => {
-  const [offers, setOffers] = useState<Offer[]>([]);
-  const [editingOffer, setEditingOffer] = useState<Offer | null>(null);
-  const [showCandidatures, setShowCandidatures] = useState<Offer | null>(null);
-  const [deletingOfferId, setDeletingOfferId] = useState<number | null>(null);
+  const [offers, setOffers] = useState<Stage[]>([]);
+  const [editingOffer, setEditingOffer] = useState<Stage | null>(null);
+  const [showCandidatures, setShowCandidatures] = useState<Stage | null>(null);
   const [candidatures, setCandidatures] = useState<Candidature[]>([]);
-  // Temporarily store the status before saving
   const [tempStatut, setTempStatut] = useState<{ [key: string]: string }>({});
-
-  // Show success message for saving the statut
   const [savedMessage, setSavedMessage] = useState<{ [key: string]: boolean }>(
     {}
   );
@@ -43,149 +21,150 @@ const OffersListPage: React.FC<DataList> = ({ data, dataCandidatures }) => {
   useEffect(() => {
     setOffers(data);
     setCandidatures(dataCandidatures);
-  }, []);
+  }, [data, dataCandidatures]);
 
-  const handleDelete = () => {
-    // if (deletingOfferId !== null) {
-    //   setOffers((prevOffers) =>
-    //     prevOffers.filter((offer) => offer.id !== deletingOfferId)
-    //   );
-    //   setDeletingOfferId(null);
-    // }
-  };
+  const handleSaveStatus = async (
+    id_etudiant: number,
+    idStage: number,
+    idCandidature: number
+  ) => {
+    const newStatut = tempStatut[idCandidature];
 
-  const handleSave = () => {
-    if (editingOffer) {
-      setOffers((prevOffers) =>
-        prevOffers.map((offer) =>
-          offer.id === editingOffer.id ? editingOffer : offer
-        )
-      );
-      setEditingOffer(null);
+    try {
+      if (newStatut === "ACCEPTEE") {
+        const response1 = await fetch(
+          `${BASE_URL}/candidature/${idCandidature}/accept`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        if (!response1.ok) {
+          console.error("Error accepting candidature:", response1.statusText);
+          return;
+        }
+
+        const response2 = await fetch(`${BASE_URL}/entretien`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({
+            idEtudiant: id_etudiant,
+            idStage,
+            dateEntretien: new Date().toISOString().split(".")[0],
+          }),
+        });
+
+        if (!response2.ok) {
+          console.error("Error scheduling interview:", response2.statusText);
+          return;
+        }
+
+        if (response1.ok && response2.ok) {
+          window.location.reload();
+        }
+      } else if (newStatut === "REFUSEE") {
+        const response = await fetch(
+          `${BASE_URL}/candidature/${idCandidature}/refuse`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          console.error("Error rejecting candidature:", response.statusText);
+          return;
+        }
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error("Error sending request:", error);
     }
+
+    setSavedMessage((prevState) => ({
+      ...prevState,
+      [id_etudiant]: true,
+    }));
+
+    setTimeout(() => {
+      setSavedMessage((prevState) => ({
+        ...prevState,
+        [id_etudiant]: false,
+      }));
+    }, 1000);
   };
 
-  const handleTypeChange = (type: string) => {
-    if (editingOffer) {
-      const newTypes = editingOffer.type.includes(type)
-        ? editingOffer.type.filter((t) => t !== type)
-        : [...editingOffer.type, type];
-      setEditingOffer({ ...editingOffer, type: newTypes });
-    }
-  };
-
-  const handleStatusChange = (etudiant: number, newStatut: string) => {
-    // Store the status temporarily for each candidature
+  const handleStatusChange = (idCandidature: number, newStatut: string) => {
     setTempStatut((prevState) => ({
       ...prevState,
-      [etudiant]: newStatut,
+      [idCandidature]: newStatut,
     }));
   };
 
-  const handleSaveStatus = (id_etudiant: number, offer: number) => {
-    const newStatut = tempStatut[id_etudiant];
-    const currentStatut = candidatures.find(
-      (candidature) =>
-        candidature.id_etudiant === id_etudiant &&
-        candidature.id_offre === offer
-    )?.statut;
-
-    // Only update if statut has changed
-    if (newStatut !== currentStatut) {
-      setCandidatures((prevCandidatures) =>
-        prevCandidatures.map((candidature) =>
-          candidature.id_etudiant === id_etudiant &&
-          candidature.id_offre === offer
-            ? { ...candidature, statut: newStatut }
-            : candidature
-        )
+  const handleExportCV = async (idCandidature: number) => {
+    try {
+      const response = await fetch(
+        `${BASE_URL}/candidature/${idCandidature}/download-cv`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
-      // Create the JSON object
-      const updatedData = {
-        id_etudiant,
-        id_offer: offer,
-        new_statut: newStatut,
-      };
 
-      // Log the JSON object to the console
-      console.log("Updated data:", updatedData);
+      if (!response.ok) {
+        console.error("Failed to fetch CV link:", response.statusText);
+        return;
+      }
 
-      // Show the success message
-      setSavedMessage((prevState) => ({
-        ...prevState,
-        [id_etudiant]: true,
-      }));
+      const cvLink = await response.text();
 
-      // Hide the success message after 2 seconds
-      setTimeout(() => {
-        setSavedMessage((prevState) => ({
-          ...prevState,
-          [id_etudiant]: false,
-        }));
-      }, 1000);
+      const link = document.createElement("a");
+      link.href = cvLink;
+      link.download = cvLink.split("/").pop() || "cv.pdf";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Error fetching CV link:", error);
     }
   };
 
-  const handleExportCV = (cvPath: string) => {
-    const link = document.createElement("a");
-    link.href = cvPath;
-    link.download = cvPath.split("/").pop() || "cv.pdf"; // Extract file name from path
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   const filteredCandidatures = candidatures.filter(
-    (c) => c.id_offre === showCandidatures?.id
+    (c) => c.stage.idStage === showCandidatures?.idStage
   );
-
-  // Log the updated candidatures whenever the 'candidatures' state changes
-  useEffect(() => {
-    console.log("Updated candidatures:", candidatures);
-  }, [candidatures]); // Runs when 'candidatures' state changes
-  useEffect(() => {
-    console.log("Data received in OffersListPage:", data);
-    console.log("Candidatures data:", dataCandidatures);
-    setOffers(data);
-    setCandidatures(dataCandidatures);
-  }, [data, dataCandidatures]);
 
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">List of Offers</h1>
       <div className="space-y-4">
         {offers.map((offer) => {
-          // Calculate the number of candidatures for the current offer
           const countCandidatures = candidatures.filter(
-            (c) => c.id_offre === offer.id
+            (c) => c.stage.idStage === offer.idStage
           ).length;
 
           return (
             <div
-              key={offer.id}
+              key={offer.idStage}
               className="flex justify-between items-center p-4 border rounded"
             >
               <div>
-                <h3 className="text-lg font-semibold">{offer.title}</h3>
+                <h3 className="text-lg font-semibold">{offer.titre}</h3>
                 <p>Description: {offer.description}</p>
-                <p>Types: {offer.type.join(", ")}</p>
-                <p>Tags: {offer.tags.join(", ")}</p>
-                <p>Date Debut: {offer.date_debut}</p>
-                <p>Date Fin: {offer.date_fin}</p>
               </div>
               <div className="flex space-x-2">
                 <Button onClick={() => setShowCandidatures(offer)} size="xs">
-                  Show Candidatures ( {countCandidatures} )
-                </Button>
-                <Button onClick={() => setEditingOffer(offer)} size="xs">
-                  Modify
-                </Button>
-                <Button
-                  color="failure"
-                  onClick={() => setDeletingOfferId(offer.id)}
-                  size="xs"
-                >
-                  Delete
+                  Show Candidatures ({countCandidatures})
                 </Button>
               </div>
             </div>
@@ -193,54 +172,52 @@ const OffersListPage: React.FC<DataList> = ({ data, dataCandidatures }) => {
         })}
       </div>
 
-      {/* Candidatures Modal */}
       {showCandidatures && (
         <Modal show={true} onClose={() => setShowCandidatures(null)}>
-          <Modal.Header>Candidatures for {showCandidatures.title}</Modal.Header>
+          <Modal.Header>Candidatures for {showCandidatures.titre}</Modal.Header>
           <Modal.Body>
             <div className="space-y-4">
               {filteredCandidatures.map((candidature) => (
                 <div
-                  key={`${candidature.id_offre}-${candidature.id_etudiant}`}
+                  key={candidature.idCand}
                   className="flex justify-between items-center p-4 border rounded"
                 >
                   <div>
                     <h3 className="text-lg font-semibold">
-                      Etudiant(e): {candidature.nom} - {candidature.prenom}
+                      {candidature.etudiant.user.nom}{" "}
+                      {candidature.etudiant.user.prenom}
                     </h3>
                     <p>
-                      CV PDF:{" "}
+                      CV:{" "}
                       <button
-                        onClick={() => handleExportCV(candidature.cv_path)}
+                        onClick={() => handleExportCV(candidature.idCand)}
                         className="text-blue-500 underline"
                       >
-                        Download CV
+                        Download
                       </button>
                     </p>
                   </div>
                   <div className="flex items-center space-x-4">
                     <select
                       value={
-                        tempStatut[candidature.id_etudiant] ||
-                        candidature.statut
+                        tempStatut[candidature.idCand] ||
+                        candidature.statutCandidature
                       }
                       onChange={(e) =>
-                        handleStatusChange(
-                          candidature.id_etudiant,
-                          e.target.value
-                        )
+                        handleStatusChange(candidature.idCand, e.target.value)
                       }
                       className="border rounded px-2 py-1"
                     >
-                      <option value="en attente">En attente</option>
-                      <option value="accepted">Accepted</option>
-                      <option value="rejected">Rejected</option>
+                      <option value="EN_ATTENTE">En attente</option>
+                      <option value="ACCEPTEE">Accepted</option>
+                      <option value="REFUSEE">Rejected</option>
                     </select>
                     <Button
                       onClick={() =>
                         handleSaveStatus(
-                          candidature.id_etudiant,
-                          candidature.id_offre
+                          candidature.etudiant.idEtudiant,
+                          candidature.stage.idStage,
+                          candidature.idCand
                         )
                       }
                       size="sm"
@@ -248,9 +225,7 @@ const OffersListPage: React.FC<DataList> = ({ data, dataCandidatures }) => {
                     >
                       Save
                     </Button>
-
-                    {/* Show success message if statut was updated */}
-                    {savedMessage[candidature.id_etudiant] && (
+                    {savedMessage[candidature.etudiant.idEtudiant] && (
                       <span className="text-green-500 text-sm ml-2">
                         Saved!
                       </span>
@@ -260,144 +235,6 @@ const OffersListPage: React.FC<DataList> = ({ data, dataCandidatures }) => {
               ))}
             </div>
           </Modal.Body>
-        </Modal>
-      )}
-
-      {/* Modify Modal */}
-      {editingOffer && (
-        <Modal show={true} onClose={() => setEditingOffer(null)}>
-          <Modal.Header>Modify Offer</Modal.Header>
-          <Modal.Body>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSave();
-              }}
-            >
-              <div className="space-y-4">
-                {/* Titre */}
-                <div>
-                  <Label htmlFor="edit-title" value="Titre" />
-                  <TextInput
-                    id="edit-title"
-                    value={editingOffer.title}
-                    onChange={(e) =>
-                      setEditingOffer({
-                        ...editingOffer,
-                        title: e.target.value,
-                      })
-                    }
-                    required
-                  />
-                </div>
-
-                {/* Description */}
-                <div>
-                  <Label htmlFor="edit-description" value="Description" />
-                  <textarea
-                    id="edit-description"
-                    value={editingOffer.description}
-                    onChange={(e) =>
-                      setEditingOffer({
-                        ...editingOffer,
-                        description: e.target.value,
-                      })
-                    }
-                    className="w-full border rounded p-2"
-                    rows={4}
-                    required
-                  />
-                </div>
-
-                {/* Types */}
-                <div>
-                  <Label value="Types" />
-                  <div className="flex space-x-4">
-                    {["PFA-1A", "PFA-2A", "PFE"].map((type) => (
-                      <div key={type} className="flex items-center">
-                        <input
-                          type="checkbox"
-                          id={`edit-type-${type}`}
-                          checked={editingOffer.type.includes(type)}
-                          onChange={() => handleTypeChange(type)}
-                        />
-                        <label
-                          htmlFor={`edit-type-${type}`}
-                          className="ml-2 font-medium"
-                        >
-                          {type}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Tags */}
-                {/* <div>
-                  <Label value="Types" />
-                  <div className="flex space-x-4">
-                    {["PFA-1A", "PFA-2A", "PFE"].map((type) => (
-                      <div key={type} className="flex items-center">
-                        <input
-                          type="checkbox"
-                          id={`edit-type-${type}`}
-                          checked={editingOffer.type.includes(type)}
-                          onChange={() => handleTypeChange(type)}
-                        />
-                        <label
-                          htmlFor={`edit-type-${type}`}
-                          className="ml-2 font-medium"
-                        >
-                          {type}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                </div> */}
-
-                {/* Date Début */}
-                <div>
-                  <Label htmlFor="edit-date-debut" value="Date Début" />
-                  <TextInput
-                    id="edit-date-debut"
-                    type="date"
-                    value={editingOffer.date_debut}
-                    onChange={(e) =>
-                      setEditingOffer({
-                        ...editingOffer,
-                        date_debut: e.target.value,
-                      })
-                    }
-                    required
-                  />
-                </div>
-              </div>
-              <div className="flex justify-end space-x-2 mt-4">
-                <Button type="submit">Save</Button>
-                <Button color="gray" onClick={() => setEditingOffer(null)}>
-                  Cancel
-                </Button>
-              </div>
-            </form>
-          </Modal.Body>
-        </Modal>
-      )}
-
-      {/* Delete Confirmation Modal */}
-      {deletingOfferId !== null && (
-        <Modal show={true} onClose={() => setDeletingOfferId(null)}>
-          <Modal.Header>Delete Offer</Modal.Header>
-          <Modal.Body>
-            <p>Are you sure you want to delete this offer?</p>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button color="failure" onClick={handleDelete}>
-              Delete
-            </Button>
-            <Button color="gray" onClick={() => setDeletingOfferId(null)}>
-              Cancel
-            </Button>
-          </Modal.Footer>
         </Modal>
       )}
     </div>

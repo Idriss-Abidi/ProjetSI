@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import Footer from "@/components/Footer";
 import NavbarRespo from "@/components/respo/NavbarRespo";
 import AffectationForm from "@/components/respo/AffectationForm";
+import { BASE_URL } from "@/constants/baseUrl";
 
 const Page = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -18,19 +19,29 @@ const Page = () => {
     const fetchData = async () => {
       try {
         // Fetch data for offers and students
-        const offresResponse = await fetch("/db/offre.json");
-        const offresData = await offresResponse.json();
-        const filteredOffres = offresData.filter(
-          (offre: { statut: string }) => offre.statut === "active"
+        const response = await fetch(`${BASE_URL}/stage/all`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
+        const dataStages = await response.json();
+        const filteredOffres = dataStages.filter(
+          (offre: { statut: string }) => offre.statut === "ACCEPTE"
         );
         setDataOffres(filteredOffres);
 
-        const EtudiantsResponse = await fetch("/db/etudiant_full.json");
-        const EtudiantsData = await EtudiantsResponse.json();
-        const filteredEtudiants = EtudiantsData.filter(
-          (etudiant: { statut: number }) => etudiant.statut === 0
-        );
-        setDataEtudiants(filteredEtudiants);
+        const response2 = await fetch(`${BASE_URL}/etudiant/all`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        const dataEtudiants = await response2.json();
+        setDataEtudiants(dataEtudiants);
       } catch (error) {
         console.error("Error fetching data:", error);
       }

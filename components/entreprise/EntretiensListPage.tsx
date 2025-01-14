@@ -1,21 +1,7 @@
 import { useState, useEffect } from "react";
 import { Modal, Button } from "flowbite-react";
-
-interface Entretien {
-  id_stage: number;
-  title: string;
-  description: string;
-  date_debut: string;
-  date_fin: string;
-  type: string[];
-  tags: string[];
-  date_entretien: string | null; // Ensure nullable date
-  statut_entretien: string;
-  cv_path: string;
-  id_etudiant: number;
-  nom: string;
-  prenom: string;
-}
+import { Entretien } from "@/types";
+import { BASE_URL } from "@/constants/baseUrl";
 
 const EntretienListPage: React.FC<{ data?: Entretien[] }> = ({ data = [] }) => {
   const [distinctStages, setDistinctStages] = useState<Entretien[]>([]);
@@ -30,29 +16,30 @@ const EntretienListPage: React.FC<{ data?: Entretien[] }> = ({ data = [] }) => {
   );
 
   // Show success message for saving the statut
-  const [savedMessage, setSavedMessage] = useState<{
-    [key: string]: boolean;
-  }>({});
+  const [savedMessage, setSavedMessage] = useState<{ [key: string]: boolean }>(
+    {}
+  );
 
   useEffect(() => {
     if (data && data.length > 0) {
-      // Extract distinct stages based on id_stage
+      // Extract distinct stages based on stage.idStage
       const stages = Array.from(
         new Map(
-          data.map((entretien) => [entretien.id_stage, entretien])
+          data.map((entretien) => [entretien.stage.idStage, entretien])
         ).values()
       );
       setDistinctStages(stages);
       setEntretiens(data);
-      // Initialize tempStatut with the initial statut_entretien for each id_etudiant
+
+      // Initialize tempStatut with the initial statutEntretien for each id_etudiant
       const initialStatut = data.reduce((acc, entretien) => {
-        acc[entretien.id_etudiant] = entretien.statut_entretien;
+        acc[entretien.etudiant.idEtudiant] = entretien.statutEntretien;
         return acc;
       }, {} as { [key: string]: string });
 
-      // Initialize tempDate with the initial date_entretien for each id_etudiant
+      // Initialize tempDate with the initial date_entretien for each id_entretien
       const initialDate = data.reduce((acc, entretien) => {
-        acc[entretien.id_etudiant] = entretien.date_entretien;
+        acc[entretien.idEntretien] = entretien.dateEntretien;
         return acc;
       }, {} as { [key: string]: string | null });
 
@@ -63,57 +50,65 @@ const EntretienListPage: React.FC<{ data?: Entretien[] }> = ({ data = [] }) => {
 
   const filteredEntretiens = showEntretiens
     ? entretiens.filter(
-        (entretien) => entretien.id_stage === showEntretiens.id_stage
+        (entretien) => entretien.stage.idStage === showEntretiens.stage.idStage
       )
     : [];
 
-  const handleStatusChange = (etudiant: number, newStatut: string) => {
-    // Store the status temporarily for each candidature
+  const handleStatusChange = (idEntretien: number, newStatut: string) => {
+    // Update tempStatut with the new value based on user selection
     setTempStatut((prevState) => ({
       ...prevState,
-      [etudiant]: newStatut,
+      [idEntretien]: newStatut,
     }));
   };
 
-  const handleDateChange = (etudiant: number, newDate: string | null) => {
-    // Store the date temporarily for each candidature
+  const handleDateChange = (idEntretien: number, newDate: string | null) => {
+    // Update tempDate with the new date value
     setTempDate((prevState) => ({
       ...prevState,
-      [etudiant]: newDate,
+      [idEntretien]: newDate + "T00:00:00",
     }));
   };
 
-  const handleSaveStatus = (
+  const handleSaveStatus = async (
+    idEntretien: number,
     id_etudiant: number,
+    id_stage: number,
     offer: number,
-    date_selected: string | null
+    dateEntretien: string | null
   ) => {
-    const newStatut = tempStatut[id_etudiant];
+    const newStatut =
+      tempStatut[idEntretien] !== undefined
+        ? tempStatut[idEntretien]
+        : entretiens.find((entretien) => entretien.idEntretien === idEntretien)
+            ?.statutEntretien; // If statut is undefined, fallback to the current value
     const currentStatut = entretiens.find(
       (entretien) =>
-        entretien.id_etudiant === id_etudiant && entretien.id_stage === offer
-    )?.statut_entretien;
+        entretien.etudiant.idEtudiant === id_etudiant &&
+        entretien.stage.idStage === offer
+    )?.statutEntretien;
 
-    // Only update if statut has changed
+    // If statutEntretien has changed, update the entretiens state
     // if (newStatut !== currentStatut) {
+    //@ts-ignore
     setEntretiens((prevEntretiens) =>
       prevEntretiens.map((entretien) =>
-        entretien.id_etudiant === id_etudiant && entretien.id_stage === offer
+        entretien.idEntretien === idEntretien
           ? {
               ...entretien,
-              statut_entretien: newStatut,
-              date_entretien: date_selected,
+              statutEntretien: newStatut,
+              dateEntretien:
+                dateEntretien || new Date().toISOString().split("T")[0],
             }
           : entretien
       )
     );
+    // }
 
     // Create the JSON object
     const updatedData = {
-      date_selected,
-      id_etudiant,
-      id_stage: offer,
-      statut_entretien: newStatut,
+      dateEntretien: dateEntretien || new Date().toISOString().split(".")[0],
+      statutEntretien: newStatut,
     };
 
     // Log the JSON object to the console
@@ -125,6 +120,22 @@ const EntretienListPage: React.FC<{ data?: Entretien[] }> = ({ data = [] }) => {
       [id_etudiant]: true,
     }));
 
+    //
+    const response = await fetch(`${BASE_URL}/entretien/${idEntretien}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify(updatedData), // Directly send the updatedData object
+    });
+
+    if (!response.ok) {
+      console.error("Error rejecting candidature:", response.statusText);
+      return;
+    }
+
+    window.location.reload();
     // Hide the success message after 2 seconds
     setTimeout(() => {
       setSavedMessage((prevState) => ({
@@ -132,7 +143,6 @@ const EntretienListPage: React.FC<{ data?: Entretien[] }> = ({ data = [] }) => {
         [id_etudiant]: false,
       }));
     }, 1000);
-    // }
   };
 
   return (
@@ -141,16 +151,16 @@ const EntretienListPage: React.FC<{ data?: Entretien[] }> = ({ data = [] }) => {
       <div className="space-y-4">
         {distinctStages.map((stage) => (
           <div
-            key={stage.id_stage}
+            key={stage.stage.idStage}
             className="flex justify-between items-center p-4 border rounded"
           >
             <div>
-              <h3 className="text-lg font-semibold">{stage.title}</h3>
-              <p>Description: {stage.description}</p>
-              <p>Types: {stage.type.join(", ")}</p>
-              <p>Tags: {stage.tags.join(", ")}</p>
-              <p>Date Debut: {stage.date_debut}</p>
-              <p>Date Fin: {stage.date_fin}</p>
+              <h3 className="text-lg font-semibold">{stage.stage.titre}</h3>
+              <p>Description: {stage.stage.description}</p>
+              <p>Types: {stage.stage.abbreviation}</p>
+              <p>Tags: {stage.stage.tags}</p>
+              <p>Date Debut: {stage.stage.dateDebut}</p>
+              <p>Date Fin: {stage.stage.dateFin}</p>
             </div>
             <Button onClick={() => setShowEntretiens(stage)}>
               Show Entretiens
@@ -162,70 +172,69 @@ const EntretienListPage: React.FC<{ data?: Entretien[] }> = ({ data = [] }) => {
       {/* Modal for showing Entretiens */}
       {showEntretiens && (
         <Modal show={true} onClose={() => setShowEntretiens(null)}>
-          <Modal.Header>Entretiens for {showEntretiens.title}</Modal.Header>
+          <Modal.Header>
+            Entretiens for {showEntretiens.stage.titre}
+          </Modal.Header>
           <Modal.Body>
             <div className="space-y-4">
               {filteredEntretiens.map((entretien) => (
                 <div
-                  key={entretien.id_etudiant}
+                  key={entretien.idEntretien}
                   className="flex justify-between items-center p-4 border rounded"
                 >
                   <div>
                     <h3 className="text-lg font-semibold">
-                      Student: {entretien.nom} {entretien.prenom}
+                      Student: {entretien.etudiant.user.nom}{" "}
+                      {entretien.etudiant.user.prenom}
                     </h3>
                     {/* Use defaultValue for the date field */}
                     <div>
-                      <p>Date:</p>
+                      <p>Date: {entretien.dateEntretien.split("T")[0]}</p>
                       <input
                         type="date"
                         defaultValue={
-                          tempDate[entretien.id_etudiant] ||
-                          new Date().toISOString().split("T")[0]
+                          tempDate[entretien.idEntretien + "T00:00:00"] ||
+                          new Date().toISOString().split("T")[0] // Ensure format is yyyy-mm-dd for type="date"
                         }
                         className="border rounded px-2 py-1"
-                        onChange={(e) =>
-                          handleDateChange(
-                            entretien.id_etudiant,
-                            e.target.value
-                          )
+                        onChange={
+                          (e) =>
+                            handleDateChange(
+                              entretien.idEntretien,
+                              e.target.value
+                            ) // e.target.value will also be in yyyy-mm-dd
                         }
                       />
                     </div>
                   </div>
                   <div className="flex space-x-4">
-                    <Button
-                      size="sm"
-                      color="info"
-                      //   onClick={() => handleDownloadCV(entretien.cv_path)}
-                    >
-                      Download CV
-                    </Button>
                     <div className="flex items-center space-x-4">
                       <select
                         value={
-                          tempStatut[entretien.id_etudiant] ||
-                          entretien.statut_entretien
+                          tempStatut[entretien.idEntretien] ||
+                          entretien.statutEntretien
                         }
                         onChange={(e) =>
                           handleStatusChange(
-                            entretien.id_etudiant,
+                            entretien.idEntretien,
                             e.target.value
                           )
                         }
                         className="border rounded px-2 py-1"
                       >
                         <option value="EN_ATTENTE">En attente</option>
-                        <option value="accepted">Accepted</option>
-                        <option value="rejected">Rejected</option>
+                        <option value="ACCEPTE">Accepted</option>
+                        <option value="REFUSE">Rejected</option>
                         <option value="EN_COURS">EN cours</option>
                       </select>
                       <Button
                         onClick={() => {
                           handleSaveStatus(
-                            entretien.id_etudiant,
-                            entretien.id_stage,
-                            tempDate[entretien.id_etudiant]
+                            entretien.idEntretien,
+                            entretien.etudiant.idEtudiant,
+                            entretien.stage.idStage,
+                            entretien.stage.idStage,
+                            tempDate[entretien.idEntretien]
                           );
                         }}
                         size="sm"
@@ -235,7 +244,7 @@ const EntretienListPage: React.FC<{ data?: Entretien[] }> = ({ data = [] }) => {
                       </Button>
 
                       {/* Show success message if statut was updated */}
-                      {savedMessage[entretien.id_etudiant] && (
+                      {savedMessage[entretien.idEntretien] && (
                         <span className="text-green-500 text-sm ml-2">
                           Saved!
                         </span>

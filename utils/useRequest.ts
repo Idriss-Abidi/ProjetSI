@@ -17,7 +17,7 @@ interface RequestOptions extends AxiosRequestConfig {
   onError?: (error: Error | AxiosError) => void;
 }
 
-function useRequest<T = any, D = any>() {
+export function useRequest<T = any, D = any>() {
   const [state, setState] = useState<RequestState<T>>({
     data: null,
     loading: false,

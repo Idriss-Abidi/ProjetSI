@@ -1,35 +1,61 @@
-"use client"; // Add this line at the top of your file
+"use client";
 
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import OffersListPage from "@/components/respo/AlloffersPage";
 import Footer from "@/components/Footer";
 import NavbarRespo from "@/components/respo/NavbarRespo";
+import { BASE_URL } from "@/constants/baseUrl";
 
 const Page = () => {
   const [dataOffres, setDataOffres] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const offresResponse = await fetch("http://localhost:8080/stage/all");
-        // const offresResponse = await fetch("/db/offre.json");
-        const offresData = await offresResponse.json();
-        // console.log(offresData);
-        setDataOffres(offresData);
-      } catch (error) {
-        console.error("Error fetching data:", error);
+        const response = await fetch(`${BASE_URL}/stage/all`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        setDataOffres(data);
+      } catch (err) {
+        //@ts-ignore
+        setError(err.message || "Something went wrong");
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchData();
-  });
+  }, []); // Empty dependency array ensures this runs only once
 
   return (
     <div>
       <NavbarRespo />
-      <div className="container m-auto p-8 ">
-        {/* offres List  */}
-        <OffersListPage data={dataOffres} />
-        {/* footer */}
+      <div className="container m-auto p-8">
+        {/* Error Message */}
+        {error && (
+          <div className="bg-red-500 text-white p-4 rounded mb-4">{error}</div>
+        )}
+
+        {/* Loading State */}
+        {loading ? (
+          <div className="text-center text-gray-500">Loading...</div>
+        ) : (
+          <OffersListPage data={dataOffres} />
+        )}
+
+        {/* Footer */}
         <Footer />
       </div>
     </div>

@@ -1,24 +1,11 @@
 import { useState, useEffect } from "react";
 import { Modal, Button, Label, TextInput, Dropdown } from "flowbite-react";
-
-interface Etudiant {
-  id_etudiant: number;
-  id_user: number;
-  CNE: string;
-  promo: string;
-  niveau: string;
-  filiere: string;
-  nom: string;
-  prenom: string;
-  email: string;
-  password: string;
-  userType: "ETUDIANT";
-  tel: string;
-  statut: number;
-}
+import { Etudiant, Filiere } from "@/types"; // Assuming you have a Filiere type
+import { BASE_URL } from "@/constants/baseUrl";
 
 const EtudiantsList: React.FC<{ data: Etudiant[] }> = ({ data }) => {
   const [etudiants, setEtudiants] = useState<Etudiant[]>([]);
+  const [filieres, setFilieres] = useState<Filiere[]>([]); // State for filieres
   const [selectedEtudiant, setSelectedEtudiant] = useState<Etudiant | null>(
     null
   );
@@ -32,7 +19,7 @@ const EtudiantsList: React.FC<{ data: Etudiant[] }> = ({ data }) => {
   const [updatedCNE, setUpdatedCNE] = useState("");
   const [updatedPromo, setUpdatedPromo] = useState("");
   const [updatedNiveau, setUpdatedNiveau] = useState<string>("");
-  const [updatedFiliere, setUpdatedFiliere] = useState<string>("");
+  const [updatedFiliere, setUpdatedFiliere] = useState<number>();
 
   // State for delete confirmation modal
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -44,16 +31,37 @@ const EtudiantsList: React.FC<{ data: Etudiant[] }> = ({ data }) => {
     setEtudiants(data);
   }, [data]);
 
+  useEffect(() => {
+    // Fetch filieres from the API
+    const fetchFilieres = async () => {
+      try {
+        const response = await fetch(`${BASE_URL}/filiere/all`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        const filieresData = await response.json();
+        setFilieres(filieresData);
+      } catch (error) {
+        console.error("Error fetching filieres:", error);
+      }
+    };
+
+    fetchFilieres();
+  }, []); // Empty dependency array ensures this runs once on mount
+
   const handleEditClick = (etudiant: Etudiant) => {
     setSelectedEtudiant(etudiant);
-    setUpdatedNom(etudiant.nom);
-    setUpdatedPrenom(etudiant.prenom);
-    setUpdatedEmail(etudiant.email);
-    setUpdatedTel(etudiant.tel);
-    setUpdatedCNE(etudiant.CNE);
+    setUpdatedNom(etudiant.user.nom);
+    setUpdatedPrenom(etudiant.user.prenom);
+    setUpdatedEmail(etudiant.user.email);
+    setUpdatedTel(etudiant.user.tel ?? ""); // Use an empty string as fallback if tel is null
+    setUpdatedCNE(etudiant.cne);
     setUpdatedPromo(etudiant.promo);
     setUpdatedNiveau(etudiant.niveau);
-    setUpdatedFiliere(etudiant.filiere);
+    setUpdatedFiliere(etudiant?.filiere?.idFiliere);
     setIsModalOpen(true);
   };
 
@@ -76,8 +84,8 @@ const EtudiantsList: React.FC<{ data: Etudiant[] }> = ({ data }) => {
       };
 
       const updatedData = {
-        id_etudiant: updatedEtudiant.id_etudiant,
-        id_user: updatedEtudiant.id_user,
+        id_etudiant: updatedEtudiant.idEtudiant,
+        id_user: updatedEtudiant.user.idUser,
         CNE: updatedEtudiant.CNE,
         promo: updatedEtudiant.promo,
         niveau: updatedEtudiant.niveau,
@@ -86,8 +94,6 @@ const EtudiantsList: React.FC<{ data: Etudiant[] }> = ({ data }) => {
         prenom: updatedEtudiant.prenom,
         email: updatedEtudiant.email,
         tel: updatedEtudiant.tel,
-        statut: updatedEtudiant.statut,
-        userType: updatedEtudiant.userType,
       };
 
       console.log(updatedData);
@@ -103,7 +109,7 @@ const EtudiantsList: React.FC<{ data: Etudiant[] }> = ({ data }) => {
 
   const confirmDelete = () => {
     if (etudiantToDelete) {
-      const deleteData = { id_etudiant: etudiantToDelete.id_etudiant };
+      const deleteData = { id_etudiant: etudiantToDelete.idEtudiant };
       console.log(deleteData);
 
       setIsDeleteModalOpen(false);
@@ -119,12 +125,12 @@ const EtudiantsList: React.FC<{ data: Etudiant[] }> = ({ data }) => {
         <div className="space-y-4 flex-col items-center">
           {etudiants.map((etudiant) => (
             <div
-              key={etudiant.id_etudiant}
+              key={etudiant.idEtudiant}
               className="flex justify-between w-full items-center p-4 border rounded"
             >
-              <label htmlFor={`etudiant-${etudiant.id_etudiant}`}>
-                {etudiant.nom} {etudiant.prenom} - Niveau: {etudiant.niveau} -
-                Filière: {etudiant.filiere}
+              <label htmlFor={`etudiant-${etudiant.idEtudiant}`}>
+                {etudiant.user.nom} {etudiant.user.prenom} - Niveau:{" "}
+                {etudiant.niveau} - Filière: {etudiant.filiere?.abbreviation}
               </label>
               <div className="flex items-center space-x-2">
                 <Button onClick={() => handleEditClick(etudiant)}>
@@ -150,7 +156,9 @@ const EtudiantsList: React.FC<{ data: Etudiant[] }> = ({ data }) => {
                     id="CNE"
                     type="text"
                     value={updatedCNE}
-                    onChange={(e) => setUpdatedCNE(e.target.value)}
+                    onChange={(e) =>
+                      setUpdatedCNE((e.target as HTMLInputElement).value)
+                    }
                   />
                 </div>
                 <div>
@@ -159,7 +167,9 @@ const EtudiantsList: React.FC<{ data: Etudiant[] }> = ({ data }) => {
                     id="nom"
                     type="text"
                     value={updatedNom}
-                    onChange={(e) => setUpdatedNom(e.target.value)}
+                    onChange={(e) =>
+                      setUpdatedNom((e.target as HTMLInputElement).value)
+                    }
                   />
                 </div>
                 <div>
@@ -168,7 +178,9 @@ const EtudiantsList: React.FC<{ data: Etudiant[] }> = ({ data }) => {
                     id="prenom"
                     type="text"
                     value={updatedPrenom}
-                    onChange={(e) => setUpdatedPrenom(e.target.value)}
+                    onChange={(e) =>
+                      setUpdatedPrenom((e.target as HTMLInputElement).value)
+                    }
                   />
                 </div>
                 <div>
@@ -177,7 +189,9 @@ const EtudiantsList: React.FC<{ data: Etudiant[] }> = ({ data }) => {
                     id="email"
                     type="email"
                     value={updatedEmail}
-                    onChange={(e) => setUpdatedEmail(e.target.value)}
+                    onChange={(e) =>
+                      setUpdatedEmail((e.target as HTMLInputElement).value)
+                    }
                   />
                 </div>
                 <div>
@@ -186,7 +200,9 @@ const EtudiantsList: React.FC<{ data: Etudiant[] }> = ({ data }) => {
                     id="tel"
                     type="tel"
                     value={updatedTel}
-                    onChange={(e) => setUpdatedTel(e.target.value)}
+                    onChange={(e) =>
+                      setUpdatedTel((e.target as HTMLInputElement).value)
+                    }
                   />
                 </div>
                 <div>
@@ -196,7 +212,9 @@ const EtudiantsList: React.FC<{ data: Etudiant[] }> = ({ data }) => {
                     type="text"
                     placeholder="Ex: 2024/25"
                     value={updatedPromo}
-                    onChange={(e) => setUpdatedPromo(e.target.value)}
+                    onChange={(e) =>
+                      setUpdatedPromo((e.target as HTMLInputElement).value)
+                    }
                   />
                 </div>
                 <div>
@@ -214,17 +232,15 @@ const EtudiantsList: React.FC<{ data: Etudiant[] }> = ({ data }) => {
                 </div>
                 <div>
                   <Label htmlFor="filiere">Filière</Label>
-                  <Dropdown label={updatedFiliere}>
-                    {["GL", "GD", "IDSIT", "2IA", "SSE", "SSI"].map(
-                      (filiere) => (
-                        <Dropdown.Item
-                          key={filiere}
-                          onClick={() => setUpdatedFiliere(filiere)}
-                        >
-                          {filiere}
-                        </Dropdown.Item>
-                      )
-                    )}
+                  <Dropdown label="Filiere">
+                    {filieres.map((filiere) => (
+                      <Dropdown.Item
+                        key={filiere.idFiliere}
+                        onClick={() => setUpdatedFiliere(filiere.idFiliere)}
+                      >
+                        {filiere.nomFiliere}
+                      </Dropdown.Item>
+                    ))}
                   </Dropdown>
                 </div>
               </div>

@@ -10,11 +10,32 @@ export interface User {
   userType: UserType;
 }
 
+export interface Filiere{
+  idFiliere: number;
+        nomFiliere: string;
+        abbreviation: string
+}
+export interface Etudiant {
+  idEtudiant: number;
+  user: User;
+  promo: string;
+  niveau: string;
+  filiere: Filiere | null;
+  cne: string;
+}
+
 export interface Entreprise {
   idEntreprise: number;
   nomEntreprise: string;
   adresse: string;
   tel: string;
+}
+
+export interface Tuteur{
+  idTuteur : number;
+  user : User;
+  entreprise:Entreprise;
+
 }
 
 export interface Gestionnaire {
@@ -33,9 +54,46 @@ export interface Stage {
   statut: StageStatutType;
   abbreviation: "PFA_1A" | "PFA_2A" | "PFE";
   tags:string;
+  tuteur : Tuteur;
 }
 
 export interface Affectation{
   stage : Stage;
-  statutAffectation:string;
+}
+
+export interface Candidature{
+  idCand: number;
+  stage: Stage;
+  etudiant: Etudiant;
+  statutCandidature:string;
+  cvPath: string;
+}
+
+export interface Entretien{
+  idEntretien:number;
+  stage: Stage;
+  etudiant: Etudiant;
+  statutEntretien:string;
+  dateEntretien:string;
+}
+
+export interface RemarqueStage{
+  idRemarque:number;
+  stage : Stage;
+  etudiant : Etudiant;
+  tuteur:Tuteur;
+  noteFinale: string,
+  remarques: string,
+  statutRemarqueStage: string
+}
+
+
+export interface Convention{
+  idConvention:number;
+  stage: Stage; 
+  tuteur: Tuteur; 
+  dateDebut: string; 
+  dateFin: string; 
+  sujet: string; 
+  conventionPdf: string;
 }
