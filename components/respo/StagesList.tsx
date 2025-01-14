@@ -99,65 +99,65 @@ const StagesList: React.FC<CardListProps> = ({ data }) => {
   const handleConfirmClick = async (
     // selectedConvention: Convention | null, // Convention data
     // selectedStage: number, // Stage data
-    conventionPdf: string, // Path of the convention file
+    // conventionPdf: string, // Path of the convention file
     selectedStage: RemarqueStage
   ) => {
-    if (conventionPdf) {
-      // Second JSON: conventionJson
-      const conventionJson = {
-        // Use user input or selected
-        conventionPdf,
-        id_etudiant: selectedStage.etudiant.idEtudiant,
-        id_tuteur: selectedStage.stage.tuteur.idTuteur,
-        id_stage: selectedStage.stage.idStage,
-        dateDebut: selectedStage.stage.dateDebut,
-        dateFin: selectedStage.stage.dateFin,
-        sujet: selectedStage.stage.titre,
-      };
+    // if (conventionPdf) {
+    // Second JSON: conventionJson
+    const conventionJson = {
+      // Use user input or selected
+      // conventionPdf,
+      id_etudiant: selectedStage.etudiant.idEtudiant,
+      id_tuteur: selectedStage.stage.tuteur.idTuteur,
+      id_stage: selectedStage.stage.idStage,
+      dateDebut: selectedStage.stage.dateDebut,
+      dateFin: selectedStage.stage.dateFin,
+      sujet: selectedStage.stage.titre,
+    };
 
-      const response1 = await fetch(
-        `${BASE_URL}/remarques-stage/${selectedStage.idRemarque}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({
-            statutRemarqueStage: "EN_COURS",
-          }),
-        }
-      );
-
-      if (!response1.ok) {
-        console.error("Error accepting stage:", response1.statusText);
-        return;
-      }
-      console.log("Convention JSON:", JSON.stringify(conventionJson, null, 2)); // Log the second JSON
-
-      // Schedule an interview
-      const response2 = await fetch(`${BASE_URL}/convention`, {
-        method: "POST",
+    const response1 = await fetch(
+      `${BASE_URL}/remarques-stage/${selectedStage.idRemarque}`,
+      {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify(conventionJson, null, 2),
-      });
-
-      if (!response2.ok) {
-        console.error("Error convention:", response2.statusText);
-        return;
+        body: JSON.stringify({
+          statutRemarqueStage: "EN_COURS",
+        }),
       }
+    );
 
-      if (response2.ok && response2.ok) {
-        setConventionPath("");
-        window.location.reload();
-      }
-      // Clear convention path (file name or path)
-      // Here you can send the generated JSON to an API or perform further actions
-      alert("Done");
+    if (!response1.ok) {
+      console.error("Error accepting stage:", response1.statusText);
+      return;
     }
+    // console.log("Convention JSON:", JSON.stringify(conventionJson, null, 2)); // Log the second JSON
+
+    // Create Convention
+    // const response2 = await fetch(`${BASE_URL}/convention`, {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //     Authorization: `Bearer ${localStorage.getItem("token")}`,
+    //   },
+    //   body: JSON.stringify(conventionJson, null, 2),
+    // });
+
+    // if (!response2.ok) {
+    //   console.error("Error convention:", response2.statusText);
+    //   return;
+    // }
+
+    // if (response2.ok && response2.ok) {
+    // setConventionPath("");
+    window.location.reload();
+    // }
+    // Clear convention path (file name or path)
+    // Here you can send the generated JSON to an API or perform further actions
+    alert("Done");
+    // }
   };
 
   return (
@@ -232,10 +232,14 @@ const StagesList: React.FC<CardListProps> = ({ data }) => {
                 Tuteur : {card.stage.tuteur.user.nom}{" "}
                 {card.stage.tuteur.user.prenom}
               </h5>
+              <h5 className="text-xl font-bold text-gray-900">
+                Statut : {card.statutRemarqueStage}
+              </h5>
             </div>
             <div className="mt-auto">
               <p className="text-gray-700 mt-2 font-bold">
-                {card.stage.dateDebut} - {card.stage.dateFin}
+                {card.stage.dateDebut.replaceAll("-", "/").split("T")[0]} -{" "}
+                {card.stage.dateFin.replaceAll("-", "/").split("T")[0]}
               </p>
               {/* <div className="mt-2">
                 <strong>Tips:</strong> {card.tips.join(", ")}
@@ -272,8 +276,11 @@ const StagesList: React.FC<CardListProps> = ({ data }) => {
                       {card.stage.tuteur.user.prenom}
                     </h5>
                     <p className="text-gray-700 font-bold">
-                      Duree : {card.stage.dateDebut} - {card.stage.dateFin}
+                      Duree :{" "}
+                      {card.stage.dateDebut.replaceAll("-", "/").split("T")[0]}{" "}
+                      - {card.stage.dateFin.replaceAll("-", "/").split("T")[0]}
                     </p>
+                    <h2>Description: </h2>
                     <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
                       {card.stage.description}
                     </p>
@@ -285,15 +292,13 @@ const StagesList: React.FC<CardListProps> = ({ data }) => {
               </Modal.Body>
               <Modal.Footer>
                 {/* Convention File Upload */}
-                <div className="justify-self-center content-center">
-                  <div>
-                    <Label
-                      htmlFor="convention-upload"
-                      className="text-gray-700"
-                    >
-                      Générer Convention
-                    </Label>
-                  </div>
+                <div className="flex justify-start items-center w-full">
+                  {/* <Label
+                    htmlFor="convention-upload"
+                    className="text-gray-700 mb-4"
+                  >
+                    Générer Convention
+                  </Label> */}
                   <PdfFormFiller
                     etudiant={`${card.etudiant.user.nom} ${card.etudiant.user.prenom}`}
                     entreprise={
@@ -303,11 +308,11 @@ const StagesList: React.FC<CardListProps> = ({ data }) => {
                   />
                 </div>
                 {/* Action Buttons */}
-                <div className="flex justify-between mt-6">
+                <div className="flex justify-end mt-6 w-full">
                   <Button
                     onClick={() =>
                       handleConfirmClick(
-                        conventionPath,
+                        // conventionPath,
                         card // Card data passed to the function
                       )
                     }

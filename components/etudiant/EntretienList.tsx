@@ -9,11 +9,11 @@ import { Modal } from "flowbite-react"; // Import Modal-related components
 import { Entretien } from "@/types"; // Ensure this type is correctly defined
 
 interface CalendarSchedulerProps {
-  offers: Entretien[];
+  entretiens: Entretien[];
 }
 
 const CalendarScheduler: React.FC<CalendarSchedulerProps> = ({
-  offers = [],
+  entretiens = [],
 }) => {
   const [openModalIndex, setOpenModalIndex] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<Entretien | null>(null);
@@ -24,8 +24,9 @@ const CalendarScheduler: React.FC<CalendarSchedulerProps> = ({
     const [year, month, day] = date.split("-");
     return `${year}-${month}-${day}`;
   };
-
-  // Map offers to FullCalendar events
+  const offers = entretiens?.filter(
+    (entretien) => entretien.statutEntretien === "EN_COURS"
+  ); // Map offers to FullCalendar events
   const events =
     offers?.map((offer) => ({
       id: `${offer.stage.idStage}-${offer.etudiant.idEtudiant}`,

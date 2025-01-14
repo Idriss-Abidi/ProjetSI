@@ -5,6 +5,7 @@ import OffersListPage from "@/components/respo/AlloffersPage";
 import Footer from "@/components/Footer";
 import NavbarRespo from "@/components/respo/NavbarRespo";
 import { BASE_URL } from "@/constants/baseUrl";
+import Loading from "@/components/Loading";
 
 const Page = () => {
   const [dataOffres, setDataOffres] = useState([]);
@@ -49,11 +50,7 @@ const Page = () => {
         )}
 
         {/* Loading State */}
-        {loading ? (
-          <div className="text-center text-gray-500">Loading...</div>
-        ) : (
-          <OffersListPage data={dataOffres} />
-        )}
+        {loading ? <Loading /> : <OffersListPage data={dataOffres} />}
 
         {/* Footer */}
         <Footer />

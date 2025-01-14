@@ -49,7 +49,7 @@ const PdfFormFiller: React.FC<PdfFormFillerProps> = ({
     }
   };
 
-  return <Button onClick={fillPdf}>Generate PDF</Button>;
+  return <Button onClick={fillPdf}>Générer Convention PDF</Button>;
 };
 
 export default PdfFormFiller;

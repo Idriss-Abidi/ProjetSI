@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import NavbarEntreprise from "@/components/entreprise/NavbarEntreprise";
 import { BASE_URL } from "@/constants/baseUrl";
 import useFetch from "@/utils/useFetch";
+import Loading from "@/components/Loading";
 
 // Utility function to fetch candidatures
 async function getAllCandidatures() {
@@ -128,7 +129,7 @@ const Page = () => {
   }, [idGestEntr]); // Re-run effect if idGestEntr changes
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   if (error) {
@@ -137,12 +138,12 @@ const Page = () => {
 
   return (
     <div>
-      <NavbarEntreprise />
+      {/* <NavbarEntreprise /> */}
       <div className="container m-auto p-8 ">
         {/* Offers List */}
         <OffersListPage data={dataOffres} dataCandidatures={dataCandidatures} />
         {/* Footer */}
-        <Footer />
+        {/* <Footer /> */}
       </div>
     </div>
   );

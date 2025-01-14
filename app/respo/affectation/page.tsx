@@ -12,9 +12,6 @@ const Page = () => {
   const [dataOffres, setDataOffres] = useState([]);
   const [dataEtudiants, setDataEtudiants] = useState([]);
 
-  // Function to toggle modal visibility
-  const toggleModal = () => setIsModalOpen(!isModalOpen);
-
   useEffect(() => {
     const fetchData = async () => {
       try {

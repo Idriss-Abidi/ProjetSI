@@ -130,6 +130,7 @@ const OffersListPage: React.FC<DataList> = ({ data, dataCandidatures }) => {
       const cvLink = await response.text();
 
       const link = document.createElement("a");
+      link.target = "_blank"; // Open in a new tab
       link.href = cvLink;
       link.download = cvLink.split("/").pop() || "cv.pdf";
       document.body.appendChild(link);
@@ -146,7 +147,7 @@ const OffersListPage: React.FC<DataList> = ({ data, dataCandidatures }) => {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">List of Offers</h1>
+      <h1 className="text-2xl font-bold mb-4">Liste des Offres</h1>
       <div className="space-y-4">
         {offers.map((offer) => {
           const countCandidatures = candidatures.filter(
@@ -164,7 +165,7 @@ const OffersListPage: React.FC<DataList> = ({ data, dataCandidatures }) => {
               </div>
               <div className="flex space-x-2">
                 <Button onClick={() => setShowCandidatures(offer)} size="xs">
-                  Show Candidatures ({countCandidatures})
+                  Voir Candidatures ({countCandidatures})
                 </Button>
               </div>
             </div>
@@ -174,7 +175,9 @@ const OffersListPage: React.FC<DataList> = ({ data, dataCandidatures }) => {
 
       {showCandidatures && (
         <Modal show={true} onClose={() => setShowCandidatures(null)}>
-          <Modal.Header>Candidatures for {showCandidatures.titre}</Modal.Header>
+          <Modal.Header>
+            Candidatures pour {showCandidatures.titre}
+          </Modal.Header>
           <Modal.Body>
             <div className="space-y-4">
               {filteredCandidatures.map((candidature) => (
@@ -223,11 +226,11 @@ const OffersListPage: React.FC<DataList> = ({ data, dataCandidatures }) => {
                       size="sm"
                       color="success"
                     >
-                      Save
+                      Sauvegarder
                     </Button>
                     {savedMessage[candidature.etudiant.idEtudiant] && (
                       <span className="text-green-500 text-sm ml-2">
-                        Saved!
+                        Sauvegardé!
                       </span>
                     )}
                   </div>

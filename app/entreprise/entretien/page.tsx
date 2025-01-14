@@ -200,7 +200,7 @@ const Page = () => {
 
   return (
     <div>
-      <NavbarEntreprise />
+      {/* <NavbarEntreprise /> */}
       <div className="container m-auto p-8 ">
         {/* offres List  */}
         <EntretiensListPage data={dataEntretiens} />

@@ -15,7 +15,7 @@ const NavbarRespo = () => {
             className="h-14 mr-2" // Adjust size and spacing
           />
           <span className="self-center whitespace-nowrap text-xl font-semibold dark:text-white">
-            ENSIAS-STAGES
+            ECS
           </span>
         </div>
       </Navbar.Brand>
@@ -35,7 +35,7 @@ const NavbarRespo = () => {
           <Dropdown.Header>
             <span className="block text-sm">Admin</span>
           </Dropdown.Header>
-          <Dropdown.Item href="/login">Sign out</Dropdown.Item>
+          <Dropdown.Item href="/login">Se déconnecter</Dropdown.Item>
         </Dropdown>
         <Navbar.Toggle />
       </div>

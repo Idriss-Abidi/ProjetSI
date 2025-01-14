@@ -212,7 +212,7 @@ const CandidatureList: React.FC<CardList3Props> = ({ data }) => {
                 />
                 <span>Refusée</span>
               </label>
-              <label className="flex items-center space-x-2">
+              {/* <label className="flex items-center space-x-2">
                 <input
                   type="checkbox"
                   className="form-checkbox"
@@ -220,7 +220,7 @@ const CandidatureList: React.FC<CardList3Props> = ({ data }) => {
                   checked={selectedStats.includes("Annuler")}
                 />
                 <span>Annulée</span>
-              </label>
+              </label> */}
             </div>
           </Dropdown>
         </div>

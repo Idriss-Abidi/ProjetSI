@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Modal, Button, Label } from "flowbite-react";
+import { Modal, Button, Label, Dropdown } from "flowbite-react";
 import { Stage } from "@/types";
 import { BASE_URL } from "@/constants/baseUrl";
 
@@ -10,6 +10,9 @@ interface DataList {
 const OffersListPage: React.FC<DataList> = ({ data }) => {
   const [offers, setOffers] = useState<Stage[]>([]);
   const [editingOffer, setEditingOffer] = useState<Stage | null>(null);
+  const [tempStatut, setTempStatut] = useState<{ [key: string]: string }>({});
+  const [selectedStats, setSelectedStats] = useState<string[]>([]);
+
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
     idStage: number | null;
@@ -20,6 +23,13 @@ const OffersListPage: React.FC<DataList> = ({ data }) => {
     setOffers(data);
   }, [data]);
 
+  const handleStatChange = (stat: string) => {
+    setSelectedStats((prev) =>
+      prev.includes(stat)
+        ? prev.filter((item) => item !== stat)
+        : [...prev, stat]
+    );
+  };
   const handleActionConfirm = async (
     idStage: number,
     action: "ACCEPTED" | "REFUSED"
@@ -52,11 +62,58 @@ const OffersListPage: React.FC<DataList> = ({ data }) => {
     }
   };
 
+  // Filter cards based on query, dates, and selected tips
+  const filteredOffers = (data || []).filter((card) => {
+    const matchesStats =
+      selectedStats.length === 0 ||
+      selectedStats.some((stat) => card.statut.includes(stat));
+
+    return matchesStats;
+  });
+
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">List of Offers</h1>
+      {/* statut  */}
+      <div className="flex items-center gap-4 px-2 my-4 ">
+        <Dropdown
+          label="Statut Stage"
+          size="sm"
+          className="bg-gray-50 border rounded shadow-md"
+        >
+          <div className="px-4 py-2 space-y-3">
+            <label className="flex items-center space-x-3 hover:bg-gray-100 p-2 rounded transition duration-200">
+              <input
+                type="checkbox"
+                className="form-checkbox h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring focus:ring-blue-300"
+                onChange={() => handleStatChange("EN_ATTENTE")}
+                checked={selectedStats.includes("EN_ATTENTE")}
+              />
+              <span className="text-gray-800 font-medium">En Attente</span>
+            </label>
+            <label className="flex items-center space-x-3 hover:bg-gray-100 p-2 rounded transition duration-200">
+              <input
+                type="checkbox"
+                className="form-checkbox h-5 w-5 text-green-600 rounded border-gray-300 focus:ring focus:ring-green-300"
+                onChange={() => handleStatChange("ACCEPTE")}
+                checked={selectedStats.includes("ACCEPTE")}
+              />
+              <span className="text-gray-800 font-medium">Acceptée</span>
+            </label>
+            <label className="flex items-center space-x-3 hover:bg-gray-100 p-2 rounded transition duration-200">
+              <input
+                type="checkbox"
+                className="form-checkbox h-5 w-5 text-red-600 rounded border-gray-300 focus:ring focus:ring-red-300"
+                onChange={() => handleStatChange("REFUSE")}
+                checked={selectedStats.includes("REFUSE")}
+              />
+              <span className="text-gray-800 font-medium">Refusée</span>
+            </label>
+          </div>
+        </Dropdown>
+      </div>
       <div className="space-y-4">
-        {offers.map((offer) => (
+        {filteredOffers.map((offer) => (
           <div
             key={offer.idStage}
             className="flex justify-between items-center p-4 border rounded"
@@ -66,8 +123,8 @@ const OffersListPage: React.FC<DataList> = ({ data }) => {
               <p>Description: {offer.description}</p>
               <p>Types: {offer.abbreviation}</p>
               <p>Tags: {offer.tags?.split(", ")}</p>
-              <p>Date Debut: {offer.dateDebut}</p>
-              <p>Date Fin: {offer.dateFin}</p>
+              <p>Date Debut: {offer.dateDebut.split("T")[0]}</p>
+              <p>Date Fin: {offer.dateFin.split("T")[0]}</p>
               <p>Status: {offer.statut}</p>
             </div>
             <div className="flex space-x-2">

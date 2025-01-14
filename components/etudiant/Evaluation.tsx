@@ -11,10 +11,16 @@ const EvaluationPage: React.FC<EvaluationPageProps> = ({ data }) => {
   useEffect(() => {
     setStage(data);
   }, [data]);
-  console.log("ok:", stageFinal);
+  // console.log("ok:", stageFinal);
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Evaluation de Stage:</h1>
+      {/* <div className="mt-4 flex justify-center items-center bg-yellow-100 text-yellow-800 p-4 rounded-md shadow-md border border-yellow-300">
+        <p className="text-lg font-semibold">
+          Stage est {stageFinal?.statutRemarqueStage}
+        </p>
+      </div> */}
+      <h1 className="text-2xl font-bold mb-4">Evaluation de Stage: </h1>{" "}
+      <small>{stageFinal?.statutRemarqueStage.replace("_", " ")}</small>
       <div className="space-y-4">
         <div key={stageFinal?.idRemarque} className="border rounded p-4">
           {/* Top Section with Étudiant and Tuteur Cards */}
@@ -39,10 +45,10 @@ const EvaluationPage: React.FC<EvaluationPageProps> = ({ data }) => {
                 <strong>Email:</strong>{" "}
                 {stageFinal?.etudiant?.user?.email || "N/A"}
               </p>
-              <p>
+              {/* <p>
                 <strong>Téléphone:</strong>{" "}
                 {stageFinal?.etudiant?.user?.tel || "N/A"}
-              </p>
+              </p> */}
             </div>
             <div className="border rounded p-4">
               <h2 className="font-semibold text-lg">Tuteur Information</h2>
@@ -58,10 +64,10 @@ const EvaluationPage: React.FC<EvaluationPageProps> = ({ data }) => {
                 <strong>Entreprise:</strong>{" "}
                 {stageFinal?.stage?.tuteur?.entreprise?.nomEntreprise || "N/A"}
               </p>
-              <p>
+              {/* <p>
                 <strong>Téléphone:</strong>{" "}
                 {stageFinal?.stage?.tuteur?.user?.tel || "N/A"}
-              </p>
+              </p> */}
               <p>
                 <strong>Email:</strong>{" "}
                 {stageFinal?.stage?.tuteur?.user?.email || "N/A"}
@@ -86,8 +92,9 @@ const EvaluationPage: React.FC<EvaluationPageProps> = ({ data }) => {
               <strong>Type:</strong> {stageFinal?.stage?.abbreviation || "N/A"}
             </p>
             <p>
-              <strong>Dates:</strong> {stageFinal?.stage?.dateDebut || "N/A"} -{" "}
-              {stageFinal?.stage?.dateFin || "N/A"}
+              <strong>Dates:</strong>{" "}
+              {stageFinal?.stage?.dateDebut.split("T")[0] || "N/A"} -{" "}
+              {stageFinal?.stage?.dateFin.split("T")[0] || "N/A"}
             </p>
           </div>
 

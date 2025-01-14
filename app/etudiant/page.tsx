@@ -80,9 +80,9 @@ const Page = () => {
   return (
     <div>
       {/* {dataEtudiant && <NavbarEtudiant etudiant={dataEtudiant} />} */}
-      <h2 className="text-center font-bold text-md bg-gray-200 text-dark m-auto text-gray-500">
+      {/* <h2 className="text-center font-bold text-md bg-gray-200 text-dark m-auto text-gray-500">
         Année universitaire : 2024-2025
-      </h2>
+      </h2> */}
 
       <div className="container m-auto p-8 ">
         <div className="hero bg-base-200 min-h-[400px]">
@@ -136,7 +136,7 @@ const Page = () => {
           </Tabs.Item>
           <Tabs.Item title="Entretiens" icon={HiCalendar}>
             <div className="p-8">
-              <CalendarScheduler offers={dataEntretiens} />
+              <CalendarScheduler entretiens={dataEntretiens} />
             </div>
           </Tabs.Item>
           <Tabs.Item title="Stages" icon={HiOutlineAcademicCap}>

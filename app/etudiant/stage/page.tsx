@@ -83,7 +83,13 @@ const Page: React.FC = () => {
   }
 
   if (error) {
-    return <p className="text-red-500">Error: {error}</p>;
+    return (
+      <div className="mt-4 flex justify-center items-center bg-yellow-100 text-yellow-800 p-4 rounded-md shadow-md border border-yellow-300">
+        <p className="text-lg font-semibold">
+          L'étudiant n'a pas encore de stage actuellement.
+        </p>
+      </div>
+    );
   }
 
   console.log("Filtered Stage Data:", dataStage);

@@ -10,8 +10,11 @@ import {
 } from "flowbite-react";
 import { Combobox } from "@headlessui/react";
 import { FaSearch } from "react-icons/fa";
-import { Entretien } from "@/types";
+import { Entretien, Etudiant } from "@/types";
 import { BASE_URL } from "@/constants/baseUrl";
+import { getUserInfo } from "@/utils/userInfo";
+import { userId } from "@/utils/userId";
+import useFetch from "@/utils/useFetch";
 
 // SearchCards Component
 interface SearchCardsProps {
@@ -53,7 +56,20 @@ const StagesList: React.FC<CardList3Props> = ({ data }) => {
   const [selectedStats, setSelectedStats] = useState<string[]>([]);
   const CARDS_PER_PAGE = 9;
 
-  // Filter cards based on query, dates, and selected tips
+  const idEtudiant = userId();
+  const { data: dataEtudiant } = useFetch(
+    `${BASE_URL}/etudiant/${idEtudiant}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    }
+  );
+
+  console.log("statut", dataEtudiant); // Log the entire fetched data
+
   const filteredCards = (data || []).filter((card) => {
     const matchesQuery = query
       ? `${card.stage.titre} ${card.stage.description} ${card.stage.abbreviation}`
@@ -147,14 +163,15 @@ const StagesList: React.FC<CardList3Props> = ({ data }) => {
               <br />
               Consultez votre email pour plus d'informations.
             </p>
-            <Button
-              onClick={() => {
-                handleSubmit(id_stage, id_etudiant); // Replace '1' with the appropriate student ID if available
-                // setOpenModalIndex(null);
-              }}
-            >
-              Accepter Stage{" "}
-            </Button>
+            {dataEtudiant.chercheStage === "NON_TROUVE" && (
+              <Button
+                onClick={() => {
+                  handleSubmit(id_stage, id_etudiant); // Replace 'id_stage' and 'id_etudiant' with appropriate values
+                }}
+              >
+                Accepter Stage
+              </Button>
+            )}
           </>
         );
       case "EN_ATTENTE":
@@ -175,9 +192,8 @@ const StagesList: React.FC<CardList3Props> = ({ data }) => {
         );
       default:
         return (
-          <p className="text-red-700">
-            Cette offre est <strong>EN COURS</strong>. Veuillez patienter pour
-            de prochaines mises à jour.
+          <p className="text-gray-700">
+            Entretiens <strong>en cours</strong> pour ce stage
           </p>
         );
     }

@@ -48,6 +48,9 @@ export default function EtudiantLayout({
   return (
     <>
       {gestEntrData && <NavbarEntreprise entreprise={gestEntrData} />}
+      <h2 className="text-center font-bold text-md bg-gray-200 text-dark m-auto text-gray-500">
+        Année universitaire : 2024-2025
+      </h2>
       {children}
       <Footer />
     </>

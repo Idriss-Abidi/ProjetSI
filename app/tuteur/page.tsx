@@ -6,6 +6,7 @@ import NavbarTuteur from "@/components/tuteur/NavbarTuteur";
 import OffersListPage from "@/components/tuteur/offresPage";
 import { BASE_URL } from "@/constants/baseUrl";
 import useFetch from "@/utils/useFetch";
+import { RemarqueStage } from "@/types";
 
 export default function Page() {
   const token = localStorage.getItem("token") || "";
@@ -17,14 +18,17 @@ export default function Page() {
       headers: { Authorization: "Bearer " + token },
     }
   );
+  const filteredData = dataOffres?.filter((offre: RemarqueStage) => {
+    return offre.statutRemarqueStage !== "EN_ATTENTE"; // Correct filter condition
+  });
 
   return (
     <div>
-      <NavbarTuteur id={idTuteur} />
+      {/* <NavbarTuteur id={idTuteur} /> */}
       <div className="container m-auto p-8 ">
-        <OffersListPage data={dataOffres} />
+        <OffersListPage data={filteredData} />
       </div>
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 }

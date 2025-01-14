@@ -1,50 +1,19 @@
 "use client";
 
+import { Tuteur } from "@/types";
 import { Avatar, Dropdown, Navbar } from "flowbite-react";
 import React, { useEffect, useState } from "react";
-
-const NavbarTuteur = ({ id }: { id: number }) => {
-  const [dataTuteur, setDataTuteur] = useState<any>(null); // Fixing the type
-  const [tuteur, setTuteur] = useState({
-    nom: "",
-    prenom: "",
-    email: "",
-  });
-  const { nom, prenom, email } = tuteur;
-
-  const loadGestEnt = async () => {
-    try {
-      const gestEntResponse = await fetch("/db/tuteur.json");
-      const gestEntData = await gestEntResponse.json();
-      const filteredTuteur = gestEntData.filter(
-        (tuteur: { id_tuteur: number }) => tuteur.id_tuteur === id
-      );
-      if (filteredTuteur.length > 0) {
-        setDataTuteur(filteredTuteur[0]); // Take the first match
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
-
-  useEffect(() => {
-    loadGestEnt();
-  }, [id]); // Load data when 'id' changes
-
-  useEffect(() => {
-    if (dataTuteur) {
-      setTuteur({
-        nom: dataTuteur.nom,
-        prenom: dataTuteur.prenom,
-        email: dataTuteur.email,
-      });
-    }
-  }, [dataTuteur]); // Update Tuteur when dataTuteur is fetched
-
+type NavbarTuteurProps = {
+  tuteur: Tuteur;
+};
+const NavbarTuteur = ({ tuteur }: NavbarTuteurProps) => {
+  if (!tuteur || !tuteur.user) {
+    return <div></div>; // Render a loading state if etudiant is not available
+  }
   return (
     <div>
       <Navbar fluid rounded className="m-auto w-[90%]">
-        <Navbar.Brand href={`/entreprise/${id}`}>
+        <Navbar.Brand href={`/entreprise`}>
           <div className="flex items-center">
             <img
               src="/logo_app.png" // Replace with the path to your logo
@@ -71,21 +40,21 @@ const NavbarTuteur = ({ id }: { id: number }) => {
           >
             <Dropdown.Header>
               <span className="block text-sm">
-                {nom} {prenom}
+                {tuteur.user.nom} {tuteur.user.prenom}
               </span>
               <span className="block truncate text-sm font-medium">
-                {email}
+                {tuteur.user.email}
               </span>
             </Dropdown.Header>
-            <Dropdown.Item href={`/entreprise/${id}`}>Acceuil</Dropdown.Item>
-            <Dropdown.Item href="#">Profil</Dropdown.Item>
+            <Dropdown.Item href={`/entreprise`}>Acceuil</Dropdown.Item>
+            {/* <Dropdown.Item href="#">Profil</Dropdown.Item> */}
             <Dropdown.Divider />
-            <Dropdown.Item href="/login">Sign out</Dropdown.Item>
+            <Dropdown.Item href="/login">Se déconnecter</Dropdown.Item>
           </Dropdown>
           <Navbar.Toggle />
         </div>
         <Navbar.Collapse>
-          <Navbar.Link href={`/tuteur/${id}/evaluation`} active>
+          <Navbar.Link href={`/tuteur/evaluation`} active>
             Evaluation Stages
           </Navbar.Link>
         </Navbar.Collapse>

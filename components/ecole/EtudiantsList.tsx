@@ -132,14 +132,14 @@ const EtudiantsList: React.FC<{ data: Etudiant[] }> = ({ data }) => {
                 {etudiant.user.nom} {etudiant.user.prenom} - Niveau:{" "}
                 {etudiant.niveau} - Filière: {etudiant.filiere?.abbreviation}
               </label>
-              <div className="flex items-center space-x-2">
+              {/* <div className="flex items-center space-x-2">
                 <Button onClick={() => handleEditClick(etudiant)}>
                   Modifier
                 </Button>
                 <Button onClick={() => handleDelete(etudiant)} color="failure">
                   Supprimer
                 </Button>
-              </div>
+              </div> */}
             </div>
           ))}
         </div>

@@ -22,6 +22,7 @@ export interface Etudiant {
   niveau: string;
   filiere: Filiere | null;
   cne: string;
+  chercheStage: string
 }
 
 export interface Entreprise {

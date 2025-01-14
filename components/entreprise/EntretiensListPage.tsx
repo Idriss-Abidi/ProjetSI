@@ -89,7 +89,6 @@ const EntretienListPage: React.FC<{ data?: Entretien[] }> = ({ data = [] }) => {
     )?.statutEntretien;
 
     // If statutEntretien has changed, update the entretiens state
-    // if (newStatut !== currentStatut) {
     //@ts-ignore
     setEntretiens((prevEntretiens) =>
       prevEntretiens.map((entretien) =>
@@ -147,7 +146,7 @@ const EntretienListPage: React.FC<{ data?: Entretien[] }> = ({ data = [] }) => {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">List of Offers</h1>
+      <h1 className="text-2xl font-bold mb-4">Liste des Entretiens</h1>
       <div className="space-y-4">
         {distinctStages.map((stage) => (
           <div
@@ -157,13 +156,13 @@ const EntretienListPage: React.FC<{ data?: Entretien[] }> = ({ data = [] }) => {
             <div>
               <h3 className="text-lg font-semibold">{stage.stage.titre}</h3>
               <p>Description: {stage.stage.description}</p>
-              <p>Types: {stage.stage.abbreviation}</p>
+              <p>Type: {stage.stage.abbreviation}</p>
               <p>Tags: {stage.stage.tags}</p>
-              <p>Date Debut: {stage.stage.dateDebut}</p>
-              <p>Date Fin: {stage.stage.dateFin}</p>
+              <p>Date Debut: {stage.stage.dateDebut.split("T")[0]}</p>
+              <p>Date Fin: {stage.stage.dateFin.split("T")[0]}</p>
             </div>
             <Button onClick={() => setShowEntretiens(stage)}>
-              Show Entretiens
+              Voir Entretiens
             </Button>
           </div>
         ))}
@@ -184,7 +183,7 @@ const EntretienListPage: React.FC<{ data?: Entretien[] }> = ({ data = [] }) => {
                 >
                   <div>
                     <h3 className="text-lg font-semibold">
-                      Student: {entretien.etudiant.user.nom}{" "}
+                      Etudiant: {entretien.etudiant.user.nom}{" "}
                       {entretien.etudiant.user.prenom}
                     </h3>
                     {/* Use defaultValue for the date field */}
@@ -225,7 +224,7 @@ const EntretienListPage: React.FC<{ data?: Entretien[] }> = ({ data = [] }) => {
                         <option value="EN_ATTENTE">En attente</option>
                         <option value="ACCEPTE">Accepted</option>
                         <option value="REFUSE">Rejected</option>
-                        <option value="EN_COURS">EN cours</option>
+                        <option value="EN_COURS">En cours</option>
                       </select>
                       <Button
                         onClick={() => {
@@ -240,13 +239,13 @@ const EntretienListPage: React.FC<{ data?: Entretien[] }> = ({ data = [] }) => {
                         size="sm"
                         color="success"
                       >
-                        Save
+                        Sauvegarder
                       </Button>
 
                       {/* Show success message if statut was updated */}
                       {savedMessage[entretien.idEntretien] && (
                         <span className="text-green-500 text-sm ml-2">
-                          Saved!
+                          Sauvegardé!
                         </span>
                       )}
                     </div>

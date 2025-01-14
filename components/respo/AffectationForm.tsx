@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Modal, Button, Label, Dropdown } from "flowbite-react";
-import { Etudiant, Stage } from "@/types";
+import { Etudiant, Filiere, Stage } from "@/types";
 import axios from "axios";
 import { BASE_URL } from "@/constants/baseUrl";
 
@@ -17,12 +17,40 @@ const AffectationForm: React.FC<DataList> = ({ data, etds }) => {
   const [selectedNiveau, setSelectedNiveau] = useState<string[]>([]);
   const [selectedFiliere, setSelectedFiliere] = useState<string[]>([]);
   const [selectedTips, setSelectedTips] = useState<string[]>([]);
+  const [filieres, setFilieres] = useState([]);
+  const [loadingFilieres, setLoadingFilieres] = useState(true);
 
   useEffect(() => {
     setOffers(data);
     setEtudiants(etds);
   }, [data, etds]);
 
+  useEffect(() => {
+    const fetchFilieres = async () => {
+      try {
+        const response = await fetch(`${BASE_URL}/filiere/all`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setFilieres(data);
+        } else {
+          console.error("Failed to fetch filieres");
+        }
+      } catch (error) {
+        console.error("Error fetching filieres:", error);
+      } finally {
+        setLoadingFilieres(false);
+      }
+    };
+
+    fetchFilieres();
+  }, []);
   const handleSelectAll = () => {
     const filteredEtudiants = etudiants.filter(
       (etudiant) =>
@@ -115,7 +143,7 @@ const AffectationForm: React.FC<DataList> = ({ data, etds }) => {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">List of Offers</h1>
+      <h1 className="text-2xl font-bold mb-4">Page d'Affectation</h1>
       <div className="space-y-4">
         {offers.map((offer) => (
           <div
@@ -125,17 +153,17 @@ const AffectationForm: React.FC<DataList> = ({ data, etds }) => {
             <div>
               <h3 className="text-lg font-semibold">{offer.titre}</h3>
               <p>Description: {offer.description}</p>
-              <p>Types: {offer.abbreviation}</p>
+              <p>Type: {offer.abbreviation}</p>
               <p>
                 Tags:{" "}
                 {offer.tags ? offer.tags.split(", ") : "No tags available"}
               </p>
-              <p>Date Debut: {offer.dateDebut}</p>
-              <p>Date Fin: {offer.dateFin}</p>
+              <p>Date Debut: {offer.dateDebut.split("T")[0]}</p>
+              <p>Date Fin: {offer.dateFin.split("T")[0]}</p>
               <p>Status: {offer.statut}</p>
             </div>
             <div className="flex space-x-2">
-              <Button onClick={() => setEditingOffer(offer)} size="xs">
+              <Button onClick={() => setEditingOffer(offer)} size="md">
                 Affecter
               </Button>
             </div>
@@ -151,21 +179,21 @@ const AffectationForm: React.FC<DataList> = ({ data, etds }) => {
               {/* Filter by Filière */}
 
               <Dropdown label="Filière" size="sm">
-                {["GL", "GD", "IDSIT", "SSE", "SSI", "2IA", "2SCL"].map(
-                  (filiere) => (
-                    <div key={filiere} className="px-4 py-2">
-                      <label className="flex items-center text-sm space-x-2">
-                        <input
-                          type="checkbox"
-                          className="form-checkbox"
-                          onChange={() => handleFiliereChange(filiere)}
-                          checked={selectedFiliere.includes(filiere)}
-                        />
-                        <span>{filiere}</span>
-                      </label>
-                    </div>
-                  )
-                )}
+                {filieres.map((filiere: Filiere) => (
+                  <div key={filiere.idFiliere} className="px-4 py-2">
+                    <label className="flex items-center text-sm space-x-2">
+                      <input
+                        type="checkbox"
+                        className="form-checkbox"
+                        onChange={() =>
+                          handleFiliereChange(filiere.abbreviation)
+                        }
+                        checked={selectedFiliere.includes(filiere.abbreviation)}
+                      />
+                      <span>{filiere.abbreviation}</span>
+                    </label>
+                  </div>
+                ))}
               </Dropdown>
 
               {/* Filter by Niveau */}

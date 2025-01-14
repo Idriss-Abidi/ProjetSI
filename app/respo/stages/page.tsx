@@ -9,6 +9,7 @@ import EtudiantsList from "@/components/respo/EtudiantsList";
 import { Etudiant, RemarqueStage } from "@/types";
 import { BASE_URL } from "@/constants/baseUrl";
 import StagesList from "@/components/respo/StagesList";
+import Loading from "@/components/Loading";
 
 const Page: React.FC = () => {
   const [etudiantsData, setEtudiantsData] = useState<Etudiant[]>([]);
@@ -73,7 +74,7 @@ const Page: React.FC = () => {
 
       <div className="container m-auto p-8">
         {loading ? (
-          <p className="text-center text-gray-500">Loading data...</p>
+          <Loading />
         ) : error ? (
           <p className="text-center text-red-500">Error: {error}</p>
         ) : (
