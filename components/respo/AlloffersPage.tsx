@@ -137,7 +137,7 @@ const OffersListPage: React.FC<DataList> = ({ data }) => {
                     action: "ACCEPTED",
                   })
                 }
-                size="xs"
+                size="md"
               >
                 Accepter
               </Button>
@@ -150,7 +150,7 @@ const OffersListPage: React.FC<DataList> = ({ data }) => {
                     action: "REFUSED",
                   })
                 }
-                size="xs"
+                size="md"
               >
                 Rejeter
               </Button>

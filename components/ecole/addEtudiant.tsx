@@ -90,12 +90,12 @@ const AddEtudiantForm = () => {
         window.location.reload();
       } else {
         const errorData = await response.json();
-        console.error("Error submitting data:", errorData);
-        alert("Failed to submit data. Please try again.");
+        // console.error("Error submitting data:", errorData);
+        // alert("Failed to submit data. Please try again.");
       }
     } catch (error) {
-      console.error("Error submitting data:", error);
-      alert("Failed to submit data. Please try again.");
+      // console.error("Error submitting data:", error);
+      // alert("Failed to submit data. Please try again.");
     }
   };
 

@@ -222,8 +222,8 @@ const EntretienListPage: React.FC<{ data?: Entretien[] }> = ({ data = [] }) => {
                         className="border rounded px-2 py-1"
                       >
                         <option value="EN_ATTENTE">En attente</option>
-                        <option value="ACCEPTE">Accepted</option>
-                        <option value="REFUSE">Rejected</option>
+                        <option value="ACCEPTE">Accepter</option>
+                        <option value="REFUSE">Rejeter</option>
                         <option value="EN_COURS">En cours</option>
                       </select>
                       <Button

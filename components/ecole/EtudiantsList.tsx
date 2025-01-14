@@ -23,9 +23,7 @@ const EtudiantsList: React.FC<{ data: Etudiant[] }> = ({ data }) => {
 
   // State for delete confirmation modal
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [etudiantToDelete, setEtudiantToDelete] = useState<Etudiant | null>(
-    null
-  );
+  const [etudiantToDelete, setEtudiantToDelete] = useState<number | null>(null);
 
   useEffect(() => {
     setEtudiants(data);
@@ -102,15 +100,28 @@ const EtudiantsList: React.FC<{ data: Etudiant[] }> = ({ data }) => {
     }
   };
 
-  const handleDelete = (etudiant: Etudiant) => {
-    setEtudiantToDelete(etudiant);
+  const handleDelete = (idEtudiant: number) => {
+    setEtudiantToDelete(idEtudiant);
     setIsDeleteModalOpen(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (etudiantToDelete) {
-      const deleteData = { id_etudiant: etudiantToDelete.idEtudiant };
-      console.log(deleteData);
+      const response = await fetch(`${BASE_URL}/etudiant/${etudiantToDelete}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (response.ok) {
+        window.location.reload();
+      } else {
+        const errorData = await response.json();
+        console.error("Error submitting data:", errorData);
+        alert("Failed to submit data. Please try again.");
+      }
 
       setIsDeleteModalOpen(false);
     }
@@ -130,16 +141,20 @@ const EtudiantsList: React.FC<{ data: Etudiant[] }> = ({ data }) => {
             >
               <label htmlFor={`etudiant-${etudiant.idEtudiant}`}>
                 {etudiant.user.nom} {etudiant.user.prenom} - Niveau:{" "}
-                {etudiant.niveau} - Filière: {etudiant.filiere?.abbreviation}
+                {etudiant.niveau} - Filière: {etudiant.filiere?.abbreviation} -
+                CNE: {etudiant.cne}
               </label>
-              {/* <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2">
                 <Button onClick={() => handleEditClick(etudiant)}>
                   Modifier
                 </Button>
-                <Button onClick={() => handleDelete(etudiant)} color="failure">
+                <Button
+                  onClick={() => handleDelete(etudiant.idEtudiant)}
+                  color="failure"
+                >
                   Supprimer
                 </Button>
-              </div> */}
+              </div>
             </div>
           ))}
         </div>
