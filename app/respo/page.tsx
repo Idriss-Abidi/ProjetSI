@@ -43,7 +43,7 @@ const Page = () => {
   return (
     <div>
       <NavbarRespo />
-      <div className="container m-auto p-8">
+      <div className="container m-auto p-8 ">
         {/* Error Message */}
         {error && (
           <div className="bg-red-500 text-white p-4 rounded mb-4">{error}</div>

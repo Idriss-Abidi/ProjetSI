@@ -92,7 +92,7 @@ const Page: React.FC = () => {
     );
   }
 
-  console.log("Filtered Stage Data:", dataStage);
+  // console.log("Filtered Stage Data:", dataStage);
 
   return (
     <div>

@@ -37,12 +37,12 @@ const Page = ({ params }: { params: Promise<{ id_tuteur: string }> }) => {
 
   return (
     <div>
-      <NavbarTuteur id={idTuteur} />
+      {/* <NavbarTuteur id={idTuteur} /> */}
       <div className="container m-auto p-8 ">
         {/* offres List  */}
         <OffersListPage data={dataOffres} />
         {/* footer */}
-        <Footer />
+        {/* <Footer /> */}
       </div>
     </div>
   );
